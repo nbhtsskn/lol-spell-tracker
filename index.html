@@ -681,6 +681,19 @@ function buildCDList() {
             </div>`;
         list.appendChild(row);
     });
+
+    // topTPタイマー行
+    const topRow = document.createElement('div');
+    topRow.className = 'cd-row';
+    topRow.innerHTML = `
+        <div class="cd-portrait" style="background:var(--bg-medium);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gold);">TOP</div>
+        <div class="cd-name">topTP</div>
+        <div class="cd-spells">
+            <span class="cd-spell ok" id="cd-top-t0">4m</span>
+            <span class="cd-spell ok" id="cd-top-t1">7m</span>
+            <span class="cd-spell ok" id="cd-top-t2">5m</span>
+        </div>`;
+    list.appendChild(topRow);
 }
 
 function updateCDList() {
@@ -703,6 +716,26 @@ function updateCDList() {
                 }
             }
         });
+    });
+
+    // topTP タイマー
+    [['t0','4m'], ['t1','7m'], ['t2','5m']].forEach(([key, label]) => {
+        const span = el(`cd-top-${key}`);
+        if (!span) return;
+        const data = S.cooldowns[`top_${key}`];
+        if (!data) {
+            span.className = 'cd-spell ok';
+            span.textContent = label;
+        } else {
+            const remaining = (data.usedAt + data.duration) - S.gameTime;
+            if (remaining <= 0) {
+                span.className = 'cd-spell ok';
+                span.textContent = label;
+            } else {
+                span.className = 'cd-spell cd';
+                span.textContent = fmt(remaining);
+            }
+        }
     });
 }
 
@@ -743,6 +776,33 @@ function buildTrackingGrid() {
         `;
         grid.appendChild(card);
     });
+
+    // topTP & 5分タイマーカード
+    const TOP_TIMERS = [
+        { key: 't0', label: 'TP (4分)',       icon: '4m', cd: 240 },
+        { key: 't1', label: 'アンリーシュドTP', icon: '7m', cd: 420 },
+        { key: 't2', label: '5分タイマー',     icon: '5m', cd: 300 },
+    ];
+    const topCard = document.createElement('div');
+    topCard.className = 'champ-card';
+    topCard.id = 'card-top';
+    topCard.innerHTML = `
+        <div class="champ-card-header">
+            <div class="champ-name" style="font-size:13px;">topTP＆5分タイマー</div>
+        </div>
+        <div class="spells-body">
+            ${TOP_TIMERS.map(t => `
+            <div class="spell-col available" id="row-top-${t.key}">
+                <div class="spell-icon" style="font-size:11px;font-weight:bold;">${t.icon}</div>
+                <div class="spell-name-label">${t.label}</div>
+                <div class="spell-status ok" id="st-top-${t.key}">使用可能</div>
+                <div class="spell-avail-at" id="av-top-${t.key}"></div>
+                <button class="use-btn" id="btn-top-${t.key}"
+                    onclick="useTopTimer('${t.key}',${t.cd})">使用</button>
+            </div>`).join('')}
+        </div>
+    `;
+    grid.appendChild(topCard);
 }
 
 function spellRowHTML(slot, key, iconUrl, name, isUlt) {
@@ -797,6 +857,7 @@ function tick() {
         refreshSpell(i,'s0');
         refreshSpell(i,'s1');
     });
+    ['t0','t1','t2'].forEach(k => refreshTopTimer(k));
     updateCDList();
 }
 
@@ -817,6 +878,46 @@ function getCooldown(slot, key) {
     let cd = sp.cooldown?.[0] ?? 0;
     if (e.ci) cd = Math.round(cd * 100 / 115);  // Cosmic Insight: +15 spell haste
     return cd;
+}
+
+function useTopTimer(key, cd) {
+    if (S.cooldowns[`top_${key}`]) return;
+    S.cooldowns[`top_${key}`] = { usedAt: S.gameTime, duration: cd };
+    refreshTopTimer(key);
+}
+
+function refreshTopTimer(key) {
+    const k   = `top_${key}`;
+    const row = el(`row-top-${key}`);
+    const st  = el(`st-top-${key}`);
+    const av  = el(`av-top-${key}`);
+    const btn = el(`btn-top-${key}`);
+    if (!row) return;
+    const data = S.cooldowns[k];
+    if (!data) {
+        row.className = 'spell-col available';
+        st.className  = 'spell-status ok';
+        st.textContent = '使用可能';
+        av.textContent = '';
+        if (btn) btn.disabled = false;
+        return;
+    }
+    const availAt   = data.usedAt + data.duration;
+    const remaining = availAt - S.gameTime;
+    if (remaining <= 0) {
+        delete S.cooldowns[k];
+        row.className = 'spell-col available';
+        st.className  = 'spell-status ok';
+        st.textContent = '使用可能';
+        av.textContent = '';
+        if (btn) btn.disabled = false;
+    } else {
+        row.className = 'spell-col on-cd';
+        st.className  = 'spell-status cd';
+        st.textContent = `残り ${fmt(remaining)}`;
+        av.textContent = `${fmt(availAt)} に使用可能`;
+        if (btn) btn.disabled = true;
+    }
 }
 
 function useSpell(slot, key) {
