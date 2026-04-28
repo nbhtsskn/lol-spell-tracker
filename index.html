@@ -78,33 +78,25 @@
 
         /* ─── SETUP PHASE ─────────────────────────── */
         #setup-phase { display: none; }
-        .setup-inner { max-width: 1400px; margin: 0 auto; padding: 16px; }
+        .setup-inner { max-width: 1400px; margin: 0 auto; padding: 12px; }
 
-        /* Champion selection cards - horizontal scroll on mobile */
-        .champs-scroll-wrap {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin: 0 -16px;
-            padding: 0 16px;
-        }
+        .champs-scroll-wrap { }
         .champs-scroll-inner {
-            display: flex;
-            gap: 12px;
-            padding-bottom: 8px;
-            min-width: max-content;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        @media (min-width: 600px) {
+            .champs-scroll-inner { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (min-width: 900px) {
+            .champs-scroll-inner { grid-template-columns: repeat(5, 1fr); }
         }
         .champion-setup-card {
-            width: 160px;
-            flex-shrink: 0;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 12px;
-        }
-        @media (min-width: 900px) {
-            .champs-scroll-wrap { overflow-x: visible; margin: 0; padding: 0; }
-            .champs-scroll-inner { display: grid; grid-template-columns: repeat(5, 1fr); min-width: 0; gap: 14px; }
-            .champion-setup-card { width: auto; }
+            padding: 10px;
         }
         .card-title {
             font-size: 11px;
@@ -257,49 +249,39 @@
         .ci-toggle input { accent-color: var(--available); width: 16px; height: 16px; }
 
         /* Champion tracking cards */
-        .tracking-scroll-wrap {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 12px 16px;
-        }
+        .tracking-scroll-wrap { padding: 8px 12px; }
         .tracking-scroll-inner {
             display: flex;
-            gap: 10px;
-            min-width: max-content;
+            flex-direction: column;
+            gap: 8px;
         }
         @media (min-width: 900px) {
-            .tracking-scroll-wrap { overflow-x: visible; padding: 16px; }
+            .tracking-scroll-wrap { padding: 16px; }
             .tracking-scroll-inner {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
-                min-width: 0;
                 gap: 12px;
             }
         }
 
         /* Champion card */
         .champ-card {
-            width: 82vw;
-            max-width: 300px;
-            flex-shrink: 0;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 6px;
             overflow: hidden;
-            scroll-snap-align: start;
         }
-        @media (min-width: 900px) { .champ-card { width: auto; max-width: none; } }
         .champ-card-header {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 12px;
+            padding: 8px 12px;
             background: rgba(200,170,110,0.06);
             border-bottom: 1px solid var(--border);
         }
         .champ-portrait-game {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: 2px solid var(--border-light);
             overflow: hidden;
@@ -308,73 +290,71 @@
         .champ-portrait-game img { width: 100%; height: 100%; object-fit: cover; }
         .champ-name { font-size: 14px; color: var(--gold-light); font-weight: bold; }
 
-        /* Spell row */
-        .spells-body { padding: 8px; }
-        .spell-row {
+        /* Spells: 3列グリッド */
+        .spells-body {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 8px;
+        }
+
+        /* Spell column */
+        .spell-col {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
+            text-align: center;
+            gap: 4px;
+            padding: 8px 4px;
             border: 1px solid var(--border);
             border-radius: 4px;
-            margin-bottom: 8px;
             background: var(--bg-medium);
             transition: border-color 0.3s, opacity 0.3s;
         }
-        .spell-row:last-child { margin-bottom: 0; }
-        .spell-row.available { border-color: var(--available); }
-        .spell-row.on-cd { opacity: 0.75; border-color: #444; }
+        .spell-col.available { border-color: var(--available); }
+        .spell-col.on-cd { opacity: 0.75; border-color: #444; }
 
         .spell-icon {
-            width: 40px;
-            height: 40px;
-            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
             border-radius: 4px;
             background: var(--bg-dark);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: var(--gold);
+            flex-shrink: 0;
         }
         .spell-icon img { width: 100%; height: 100%; object-fit: cover; }
 
-        .spell-meta { flex: 1; min-width: 0; }
         .spell-name-label {
-            font-size: 12px;
+            font-size: 10px;
             color: var(--gold-light);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 2px;
+            width: 100%;
         }
-        .spell-status { font-size: 12px; font-variant-numeric: tabular-nums; }
+        .spell-status { font-size: 11px; font-variant-numeric: tabular-nums; }
         .spell-status.ok { color: var(--available); }
         .spell-status.cd { color: var(--cd-color); }
-        .spell-avail-at { font-size: 11px; color: #666; font-variant-numeric: tabular-nums; }
+        .spell-avail-at { font-size: 10px; color: #666; font-variant-numeric: tabular-nums; }
 
-        .spell-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
-        }
         .use-btn {
-            padding: 8px 12px;
-            min-height: 44px;
-            min-width: 52px;
+            width: 100%;
+            padding: 7px 4px;
+            min-height: 40px;
             border: 1px solid var(--border-light);
             background: var(--bg-dark);
             color: var(--gold);
             cursor: pointer;
             border-radius: 4px;
             font-size: 13px;
-            transition: background 0.15s;
-            white-space: nowrap;
             font-weight: bold;
+            transition: background 0.15s;
         }
         .use-btn:hover:not(:disabled), .use-btn:active:not(:disabled) { background: rgba(200,170,110,0.3); }
         .use-btn:disabled { opacity: 0.25; cursor: not-allowed; }
@@ -385,17 +365,17 @@
             display: flex;
             align-items: center;
             gap: 3px;
-            font-size: 11px;
+            font-size: 10px;
             color: #777;
         }
         .ult-lv-select {
             background: var(--bg-dark);
             border: 1px solid var(--border);
             color: var(--gold);
-            padding: 2px 3px;
+            padding: 2px 2px;
             border-radius: 3px;
-            font-size: 12px;
-            width: 40px;
+            font-size: 11px;
+            width: 36px;
         }
 
         /* scrollbar */
@@ -678,25 +658,20 @@ function spellRowHTML(slot, key, iconUrl, name, isUlt) {
         ? `<img src="${iconUrl}" alt="${name}" loading="lazy">`
         : `<span>${isUlt ? 'R' : (key==='s0'?'D':'F')}</span>`;
     const ultLvRow = isUlt ? `
-        <div class="ult-level-row">
-            Lv
+        <div class="ult-level-row">Lv
             <select class="ult-lv-select" id="ulv-${slot}" onchange="S.ultLevels[${slot}]=+this.value">
                 <option>1</option><option>2</option><option>3</option>
             </select>
         </div>` : '';
     return `
-        <div class="spell-row available" id="row-${slot}-${key}">
+        <div class="spell-col available" id="row-${slot}-${key}">
             <div class="spell-icon">${iconHTML}</div>
-            <div class="spell-meta">
-                <div class="spell-name-label">${name}</div>
-                <div class="spell-status ok" id="st-${slot}-${key}">使用可能</div>
-                <div class="spell-avail-at" id="av-${slot}-${key}"></div>
-            </div>
-            <div class="spell-actions">
-                <button class="${btnClass}" id="btn-${slot}-${key}"
-                    onclick="useSpell(${slot},'${key}')">使用</button>
-                ${ultLvRow}
-            </div>
+            <div class="spell-name-label">${name}</div>
+            <div class="spell-status ok" id="st-${slot}-${key}">使用可能</div>
+            <div class="spell-avail-at" id="av-${slot}-${key}"></div>
+            ${ultLvRow}
+            <button class="${btnClass}" id="btn-${slot}-${key}"
+                onclick="useSpell(${slot},'${key}')">使用</button>
         </div>`;
 }
 
@@ -788,7 +763,7 @@ function refreshSpell(slot, key) {
 
     const data = S.cooldowns[k];
     if (!data) {
-        row.className = 'spell-row available';
+        row.className = 'spell-col available';
         st.className  = 'spell-status ok';
         st.textContent = '使用可能';
         av.textContent = '';
@@ -801,13 +776,13 @@ function refreshSpell(slot, key) {
 
     if (remaining <= 0) {
         delete S.cooldowns[k];
-        row.className = 'spell-row available';
+        row.className = 'spell-col available';
         st.className  = 'spell-status ok';
         st.textContent = '使用可能';
         av.textContent = '';
         if (btn) btn.disabled = false;
     } else {
-        row.className = 'spell-row on-cd';
+        row.className = 'spell-col on-cd';
         st.className  = 'spell-status cd';
         st.textContent = `残り ${fmt(remaining)}`;
         av.textContent = `${fmt(availAt)} に使用可能`;
