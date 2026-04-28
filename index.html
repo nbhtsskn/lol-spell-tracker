@@ -1239,6 +1239,13 @@ function fmt(sec) {
 }
 
 // ═══════════════════════════════════════════════════
+//  GLOBAL EXPORTS (module scope → inline onclick)
+// ═══════════════════════════════════════════════════
+window.useSpell     = useSpell;
+window.useTopTimer  = useTopTimer;
+window.pushUltLevel = pushUltLevel;
+
+// ═══════════════════════════════════════════════════
 //  START
 // ═══════════════════════════════════════════════════
 init();
