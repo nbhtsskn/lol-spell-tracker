@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LoL スペルトラッカー</title>
+    <style>
+        :root {
+            --gold: #c8aa6e;
+            --gold-light: #f0e6d3;
+            --bg-dark: #010a13;
+            --bg-medium: #0a1428;
+            --bg-card: #0f1923;
+            --border: #785a28;
+            --border-light: #c89b3c;
+            --available: #0bc4be;
+            --cd-color: #aaa;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            background: var(--bg-dark);
+            color: var(--gold);
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+        button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+        /* ─── HEADER ─────────────────────────────── */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, #000 0%, var(--bg-medium) 100%);
+            border-bottom: 2px solid var(--border-light);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        header h1 {
+            font-size: 18px;
+            color: var(--gold-light);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        /* ─── LOADING ─────────────────────────────── */
+        #loading {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 15px;
+            opacity: 0.7;
+        }
+
+        /* ─── BUTTONS ─────────────────────────────── */
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-medium);
+            color: var(--gold);
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 14px;
+            transition: background 0.15s;
+            letter-spacing: 1px;
+        }
+        .btn:hover:not(:disabled) { background: rgba(200,170,110,0.2); }
+        .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-primary {
+            background: linear-gradient(180deg, #785a28, #463714);
+            color: var(--gold-light);
+            border-color: var(--border-light);
+        }
+        .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #c8aa6e, #785a28); color: #000; }
+        .btn-danger { border-color: #e84057; color: #e84057; }
+        .btn-danger:hover:not(:disabled) { background: rgba(232,64,87,0.15); }
+        .btn-full { width: 100%; }
+
+        /* ─── SETUP PHASE ─────────────────────────── */
+        #setup-phase { display: none; }
+        .setup-inner { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+        /* Champion selection cards - horizontal scroll on mobile */
+        .champs-scroll-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -16px;
+            padding: 0 16px;
+        }
+        .champs-scroll-inner {
+            display: flex;
+            gap: 12px;
+            padding-bottom: 8px;
+            min-width: max-content;
+        }
+        .champion-setup-card {
+            width: 160px;
+            flex-shrink: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+        }
+        @media (min-width: 900px) {
+            .champs-scroll-wrap { overflow-x: visible; margin: 0; padding: 0; }
+            .champs-scroll-inner { display: grid; grid-template-columns: repeat(5, 1fr); min-width: 0; gap: 14px; }
+            .champion-setup-card { width: auto; }
+        }
+        .card-title {
+            font-size: 11px;
+            text-align: center;
+            color: var(--gold-light);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .champion-portrait-setup {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 10px;
+            background: var(--bg-medium);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0.4;
+            cursor: pointer;
+        }
+        .champion-portrait-setup.filled { opacity: 1; }
+        .champion-portrait-setup img { width: 100%; height: 100%; object-fit: cover; }
+        .search-container { position: relative; margin-bottom: 10px; }
+        .search-input {
+            width: 100%;
+            background: var(--bg-medium);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            padding: 8px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            outline: none;
+        }
+        .search-input:focus { border-color: var(--border-light); }
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0d1b2a;
+            border: 1px solid var(--border-light);
+            border-radius: 3px;
+            max-height: 160px;
+            overflow-y: auto;
+            z-index: 200;
+            display: none;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .dropdown-item:hover, .dropdown-item:active { background: rgba(200,170,110,0.2); }
+        .dropdown-item img { width: 24px; height: 24px; border-radius: 3px; }
+        .spells-row { display: flex; gap: 6px; }
+        .spell-select-wrap { flex: 1; }
+        .spell-select-wrap label { font-size: 10px; display: block; margin-bottom: 3px; opacity: 0.6; }
+        .spell-select {
+            width: 100%;
+            background: var(--bg-medium);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            padding: 5px 4px;
+            border-radius: 3px;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .start-btn-wrap {
+            margin-top: 16px;
+            padding: 0 0 24px;
+        }
+
+        /* ─── GAME PHASE ──────────────────────────── */
+        #game-phase { display: none; }
+
+        /* Timer bar - sticky */
+        .timer-bar {
+            position: sticky;
+            top: 58px; /* below header */
+            z-index: 90;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .game-timer {
+            font-size: 44px;
+            font-weight: bold;
+            color: var(--gold-light);
+            letter-spacing: 4px;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+            min-width: 120px;
+        }
+        .timer-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .timer-btn {
+            padding: 10px 16px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-medium);
+            color: var(--gold);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 20px;
+            min-width: 48px;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+        .timer-btn:hover, .timer-btn:active { background: rgba(200,170,110,0.2); }
+        .timer-btn.primary {
+            background: linear-gradient(180deg, #785a28, #463714);
+            color: var(--gold-light);
+            font-size: 22px;
+            padding: 10px 20px;
+        }
+        .timer-btn.danger { border-color: #e84057; color: #e84057; }
+        .timer-btn.danger:hover, .timer-btn.danger:active { background: rgba(232,64,87,0.15); }
+
+        /* CI row */
+        .ci-row {
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: var(--bg-medium);
+            border-bottom: 1px solid var(--border);
+        }
+        .ci-row-label { font-size: 11px; color: #777; white-space: nowrap; }
+        .ci-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .ci-toggle input { accent-color: var(--available); width: 16px; height: 16px; }
+
+        /* Champion tracking cards */
+        .tracking-scroll-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 16px;
+        }
+        .tracking-scroll-inner {
+            display: flex;
+            gap: 10px;
+            min-width: max-content;
+        }
+        @media (min-width: 900px) {
+            .tracking-scroll-wrap { overflow-x: visible; padding: 16px; }
+            .tracking-scroll-inner {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                min-width: 0;
+                gap: 12px;
+            }
+        }
+
+        /* Champion card */
+        .champ-card {
+            width: 82vw;
+            max-width: 300px;
+            flex-shrink: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            scroll-snap-align: start;
+        }
+        @media (min-width: 900px) { .champ-card { width: auto; max-width: none; } }
+        .champ-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(200,170,110,0.06);
+            border-bottom: 1px solid var(--border);
+        }
+        .champ-portrait-game {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .champ-portrait-game img { width: 100%; height: 100%; object-fit: cover; }
+        .champ-name { font-size: 14px; color: var(--gold-light); font-weight: bold; }
+
+        /* Spell row */
+        .spells-body { padding: 8px; }
+        .spell-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background: var(--bg-medium);
+            transition: border-color 0.3s, opacity 0.3s;
+        }
+        .spell-row:last-child { margin-bottom: 0; }
+        .spell-row.available { border-color: var(--available); }
+        .spell-row.on-cd { opacity: 0.75; border-color: #444; }
+
+        .spell-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 4px;
+            background: var(--bg-dark);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+        .spell-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+        .spell-meta { flex: 1; min-width: 0; }
+        .spell-name-label {
+            font-size: 12px;
+            color: var(--gold-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .spell-status { font-size: 12px; font-variant-numeric: tabular-nums; }
+        .spell-status.ok { color: var(--available); }
+        .spell-status.cd { color: var(--cd-color); }
+        .spell-avail-at { font-size: 11px; color: #666; font-variant-numeric: tabular-nums; }
+
+        .spell-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .use-btn {
+            padding: 8px 12px;
+            min-height: 44px;
+            min-width: 52px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-dark);
+            color: var(--gold);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: background 0.15s;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        .use-btn:hover:not(:disabled), .use-btn:active:not(:disabled) { background: rgba(200,170,110,0.3); }
+        .use-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+        .use-btn.ult { border-color: #e2c45a; color: #e2c45a; }
+        .use-btn.ult:hover:not(:disabled), .use-btn.ult:active:not(:disabled) { background: rgba(226,196,90,0.2); }
+
+        .ult-level-row {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            color: #777;
+        }
+        .ult-lv-select {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            padding: 2px 3px;
+            border-radius: 3px;
+            font-size: 12px;
+            width: 40px;
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<!-- ─── HEADER ──────────────────────────────────────── -->
+<header>
+    <h1>LoL Spell Tracker</h1>
+</header>
+
+<!-- ─── LOADING ─────────────────────────────────────── -->
+<div id="loading">データを読み込み中...</div>
+
+<!-- ─── SETUP PHASE ──────────────────────────────────── -->
+<div id="setup-phase">
+    <div class="setup-inner">
+        <!-- 5 champion cards -->
+        <div class="champs-scroll-wrap">
+            <div class="champs-scroll-inner" id="champions-grid"></div>
+        </div>
+
+        <div class="start-btn-wrap">
+            <button class="btn btn-primary btn-full" id="start-btn" disabled>ゲーム開始</button>
+        </div>
+    </div>
+</div>
+
+<!-- ─── GAME PHASE ────────────────────────────────────── -->
+<div id="game-phase">
+    <!-- Timer (sticky) -->
+    <div class="timer-bar">
+        <div class="game-timer" id="game-timer">00:00</div>
+        <div class="timer-btns">
+            <button class="timer-btn primary" id="timer-toggle">▶</button>
+            <button class="timer-btn" id="timer-reset" title="リセット">↺</button>
+            <button class="timer-btn danger" id="back-btn" title="設定に戻る">←</button>
+        </div>
+    </div>
+    <!-- Cosmic Insight row -->
+    <div class="ci-row" id="ci-row">
+        <span class="ci-row-label">コズミックインサイト:</span>
+    </div>
+    <!-- Tracking cards -->
+    <div class="tracking-scroll-wrap">
+        <div class="tracking-scroll-inner" id="tracking-grid"></div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONSTANTS & HELPERS
+// ═══════════════════════════════════════════════════
+const DDragon = 'https://ddragon.leagueoflegends.com';
+
+function champIcon(id)   { return `${DDragon}/cdn/${S.version}/img/champion/${id}.png`; }
+function spellImg(full)  { return `${DDragon}/cdn/${S.version}/img/spell/${full}`; }
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+function el(id)   { return document.getElementById(id); }
+
+async function fetchJSON(url) {
+    const r = await fetch(url);
+    const d = await r.json();
+    if (!r.ok) throw Object.assign(new Error(d.status?.message || r.status), { status: r.status, data: d });
+    return d;
+}
+
+// ═══════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════
+const S = {
+    version: null,
+    champions: {},        // id -> basic info
+    summonerSpells: {},   // id -> spell info
+    enemies: Array.from({length:5}, (_, i) => ({
+        slot: i,
+        championId: null,
+        championDetail: null,
+        spells: [null, null],
+        ci: false,
+    })),
+    ultLevels: [1,1,1,1,1],
+    gameTime: 0,
+    running: false,
+    interval: null,
+    cooldowns: {},   // `${slot}_${key}` -> { usedAt, duration }
+};
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+async function init() {
+    try {
+        const versions = await fetchJSON(`${DDragon}/api/versions.json`);
+        S.version = versions[0];
+
+        const [champsRes, spellsRes] = await Promise.all([
+            fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/champion.json`),
+            fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/summoner.json`),
+        ]);
+        S.champions = champsRes.data;
+        S.summonerSpells = spellsRes.data;
+
+        hide('loading');
+        show('setup-phase');
+        buildSetup();
+    } catch(e) {
+        el('loading').textContent = 'データ読み込み失敗。ページを再読み込みしてください。';
+        console.error(e);
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  SETUP RENDERING
+// ═══════════════════════════════════════════════════
+function buildSetup() {
+    const grid = el('champions-grid');
+    grid.innerHTML = '';
+    S.enemies.forEach((enemy, i) => {
+        const card = document.createElement('div');
+        card.className = 'champion-setup-card';
+        const champName = enemy.championId ? (S.champions[enemy.championId]?.name ?? enemy.championId) : '';
+        card.innerHTML = `
+            <div class="card-title">敵 ${i+1}</div>
+            <div class="champion-portrait-setup ${enemy.championId ? 'filled' : ''}" id="portrait-setup-${i}">
+                ${enemy.championId
+                    ? `<img src="${champIcon(enemy.championId)}" alt="${champName}" loading="lazy">`
+                    : '?'}
+            </div>
+            <div class="search-container">
+                <input class="search-input" id="search-${i}" type="text"
+                    placeholder="チャンピオン..." autocomplete="off"
+                    value="${champName}">
+                <div class="search-dropdown" id="dropdown-${i}"></div>
+            </div>
+            <div class="spells-row">
+                <div class="spell-select-wrap">
+                    <label>D</label>
+                    <select class="spell-select" id="ss0-${i}">${spellOpts(enemy.spells[0])}</select>
+                </div>
+                <div class="spell-select-wrap">
+                    <label>F</label>
+                    <select class="spell-select" id="ss1-${i}">${spellOpts(enemy.spells[1])}</select>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+
+        const input = el(`search-${i}`);
+        input.addEventListener('input',  () => showDropdown(i, input.value));
+        input.addEventListener('focus',  () => showDropdown(i, input.value));
+        input.addEventListener('blur',   () => setTimeout(() => hideDropdown(i), 200));
+        el(`ss0-${i}`).addEventListener('change', e => { S.enemies[i].spells[0] = e.target.value || null; checkStart(); });
+        el(`ss1-${i}`).addEventListener('change', e => { S.enemies[i].spells[1] = e.target.value || null; checkStart(); });
+    });
+    checkStart();
+}
+
+function spellOpts(selected) {
+    const list = Object.values(S.summonerSpells)
+        .filter(s => s.modes?.includes('CLASSIC'))
+        .sort((a,b) => a.name.localeCompare(b.name));
+    return '<option value="">-- なし --</option>' +
+        list.map(s => `<option value="${s.id}"${s.id===selected?' selected':''}>${s.name}</option>`).join('');
+}
+
+function showDropdown(slot, query) {
+    const dd = el(`dropdown-${slot}`);
+    const q = query.toLowerCase().trim();
+    if (!q) { dd.style.display = 'none'; return; }
+    const matches = Object.values(S.champions)
+        .filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q))
+        .slice(0, 8);
+    if (!matches.length) { dd.style.display = 'none'; return; }
+    dd.innerHTML = matches.map(c =>
+        `<div class="dropdown-item" data-id="${c.id}">
+            <img src="${champIcon(c.id)}" alt="${c.name}" loading="lazy">
+            <span>${c.name}</span>
+        </div>`
+    ).join('');
+    dd.style.display = 'block';
+    dd.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('mousedown', () => pickChampion(slot, item.dataset.id));
+    });
+}
+
+function hideDropdown(slot) { el(`dropdown-${slot}`).style.display = 'none'; }
+
+async function pickChampion(slot, id) {
+    S.enemies[slot].championId = id;
+    S.enemies[slot].championDetail = null;
+    el(`search-${slot}`).value = S.champions[id]?.name ?? id;
+    const portrait = el(`portrait-setup-${slot}`);
+    portrait.className = 'champion-portrait-setup filled';
+    portrait.innerHTML = `<img src="${champIcon(id)}" alt="${id}" loading="lazy">`;
+    hideDropdown(slot);
+    checkStart();
+    try {
+        const res = await fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/champion/${id}.json`);
+        S.enemies[slot].championDetail = res.data[id];
+    } catch(e) { console.error('champion detail fetch failed', e); }
+}
+
+function checkStart() {
+    el('start-btn').disabled = !S.enemies.every(e => e.championId !== null);
+}
+
+el('start-btn').addEventListener('click', startGame);
+
+// ═══════════════════════════════════════════════════
+//  GAME PHASE
+// ═══════════════════════════════════════════════════
+function startGame() {
+    hide('setup-phase');
+    show('game-phase');
+    S.gameTime = 0;
+    S.running  = false;
+    S.cooldowns = {};
+    S.ultLevels = [1,1,1,1,1];
+    clearInterval(S.interval);
+    el('timer-toggle').textContent = '▶';
+    buildCIRow();
+    buildTrackingGrid();
+    tick();
+}
+
+function buildCIRow() {
+    const row = el('ci-row');
+    row.innerHTML = '<span class="ci-row-label">コズミックインサイト:</span>';
+    S.enemies.forEach((enemy, i) => {
+        const name = S.champions[enemy.championId]?.name ?? `敵${i+1}`;
+        const label = document.createElement('label');
+        label.className = 'ci-toggle';
+        label.innerHTML = `<input type="checkbox" id="ci-${i}"${enemy.ci?' checked':''}><span>${name}</span>`;
+        row.appendChild(label);
+        el(`ci-${i}`).addEventListener('change', e => { S.enemies[i].ci = e.target.checked; });
+    });
+}
+
+function buildTrackingGrid() {
+    const grid = el('tracking-grid');
+    grid.innerHTML = '';
+    S.enemies.forEach((enemy, i) => {
+        const champ = S.champions[enemy.championId];
+        const ult   = enemy.championDetail?.spells?.[3];
+        const card  = document.createElement('div');
+        card.className = 'champ-card';
+        card.id = `card-${i}`;
+        card.innerHTML = `
+            <div class="champ-card-header">
+                <div class="champ-portrait-game">
+                    <img src="${champIcon(enemy.championId)}" alt="${champ?.name ?? ''}" loading="lazy">
+                </div>
+                <div class="champ-name">${champ?.name ?? enemy.championId}</div>
+            </div>
+            <div class="spells-body">
+                ${spellRowHTML(i, 'ult', ult ? spellImg(ult.image.full) : null, ult?.name ?? 'R (Ult)', true)}
+                ${spellRowHTML(i, 's0', spellImgFromId(enemy.spells[0]), spellName(enemy.spells[0], 'スペル1'), false)}
+                ${spellRowHTML(i, 's1', spellImgFromId(enemy.spells[1]), spellName(enemy.spells[1], 'スペル2'), false)}
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function spellRowHTML(slot, key, iconUrl, name, isUlt) {
+    const btnClass = isUlt ? 'use-btn ult' : 'use-btn';
+    const iconHTML = iconUrl
+        ? `<img src="${iconUrl}" alt="${name}" loading="lazy">`
+        : `<span>${isUlt ? 'R' : (key==='s0'?'D':'F')}</span>`;
+    const ultLvRow = isUlt ? `
+        <div class="ult-level-row">
+            Lv
+            <select class="ult-lv-select" id="ulv-${slot}" onchange="S.ultLevels[${slot}]=+this.value">
+                <option>1</option><option>2</option><option>3</option>
+            </select>
+        </div>` : '';
+    return `
+        <div class="spell-row available" id="row-${slot}-${key}">
+            <div class="spell-icon">${iconHTML}</div>
+            <div class="spell-meta">
+                <div class="spell-name-label">${name}</div>
+                <div class="spell-status ok" id="st-${slot}-${key}">使用可能</div>
+                <div class="spell-avail-at" id="av-${slot}-${key}"></div>
+            </div>
+            <div class="spell-actions">
+                <button class="${btnClass}" id="btn-${slot}-${key}"
+                    onclick="useSpell(${slot},'${key}')">使用</button>
+                ${ultLvRow}
+            </div>
+        </div>`;
+}
+
+function spellImgFromId(id) {
+    if (!id) return null;
+    const sp = S.summonerSpells[id];
+    return sp ? spellImg(sp.image.full) : null;
+}
+
+function spellName(id, fallback) {
+    return id ? (S.summonerSpells[id]?.name ?? fallback) : fallback;
+}
+
+// ═══════════════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════════════
+el('timer-toggle').addEventListener('click', () => {
+    if (S.running) {
+        S.running = false;
+        clearInterval(S.interval);
+        el('timer-toggle').textContent = '▶';
+    } else {
+        S.running = true;
+        el('timer-toggle').textContent = '⏸';
+        S.interval = setInterval(() => { S.gameTime++; tick(); }, 1000);
+    }
+});
+
+el('timer-reset').addEventListener('click', () => {
+    S.running = false;
+    clearInterval(S.interval);
+    S.gameTime = 0;
+    S.cooldowns = {};
+    el('timer-toggle').textContent = '▶';
+    tick();
+});
+
+el('back-btn').addEventListener('click', () => {
+    S.running = false;
+    clearInterval(S.interval);
+    hide('game-phase');
+    show('setup-phase');
+});
+
+function tick() {
+    const m = String(Math.floor(S.gameTime/60)).padStart(2,'0');
+    const s = String(S.gameTime%60).padStart(2,'0');
+    el('game-timer').textContent = `${m}:${s}`;
+    S.enemies.forEach((_,i) => {
+        refreshSpell(i,'ult');
+        refreshSpell(i,'s0');
+        refreshSpell(i,'s1');
+    });
+}
+
+// ═══════════════════════════════════════════════════
+//  COOLDOWN LOGIC
+// ═══════════════════════════════════════════════════
+function getCooldown(slot, key) {
+    const e = S.enemies[slot];
+    if (key === 'ult') {
+        const ult = e.championDetail?.spells?.[3];
+        if (!ult) return 0;
+        const arr = ult.cooldown ?? [];
+        return arr[Math.min(S.ultLevels[slot]-1, arr.length-1)] ?? 0;
+    }
+    const idx = key === 's0' ? 0 : 1;
+    const sp  = S.summonerSpells[e.spells[idx]];
+    if (!sp) return 0;
+    let cd = sp.cooldown?.[0] ?? 0;
+    if (e.ci) cd = Math.round(cd * 100 / 115);  // Cosmic Insight: +15 spell haste
+    return cd;
+}
+
+function useSpell(slot, key) {
+    const cd = getCooldown(slot, key);
+    if (cd <= 0 || S.cooldowns[`${slot}_${key}`]) return;
+    S.cooldowns[`${slot}_${key}`] = { usedAt: S.gameTime, duration: cd };
+    refreshSpell(slot, key);
+}
+
+function refreshSpell(slot, key) {
+    const k   = `${slot}_${key}`;
+    const row = el(`row-${slot}-${key}`);
+    const st  = el(`st-${slot}-${key}`);
+    const av  = el(`av-${slot}-${key}`);
+    const btn = el(`btn-${slot}-${key}`);
+    if (!row) return;
+
+    const data = S.cooldowns[k];
+    if (!data) {
+        row.className = 'spell-row available';
+        st.className  = 'spell-status ok';
+        st.textContent = '使用可能';
+        av.textContent = '';
+        if (btn) btn.disabled = false;
+        return;
+    }
+
+    const availAt  = data.usedAt + data.duration;
+    const remaining = availAt - S.gameTime;
+
+    if (remaining <= 0) {
+        delete S.cooldowns[k];
+        row.className = 'spell-row available';
+        st.className  = 'spell-status ok';
+        st.textContent = '使用可能';
+        av.textContent = '';
+        if (btn) btn.disabled = false;
+    } else {
+        row.className = 'spell-row on-cd';
+        st.className  = 'spell-status cd';
+        st.textContent = `残り ${fmt(remaining)}`;
+        av.textContent = `${fmt(availAt)} に使用可能`;
+        if (btn) btn.disabled = true;
+    }
+}
+
+function fmt(sec) {
+    return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+}
+
+// ═══════════════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
