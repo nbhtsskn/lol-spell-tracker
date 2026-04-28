@@ -513,13 +513,16 @@ let localPush = false;
 // Firebase → ローカル反映
 function applyRemoteState(data) {
     if (!data) return;
-    if (data.gameTime !== undefined) S.gameTime = data.gameTime;
+    // タイマー: startedAt から経過秒を計算（毎秒pushしない）
     if (data.running !== undefined) {
         const wasRunning = S.running;
         S.running = data.running;
         if (!wasRunning && S.running) {
+            // 開始時刻から現在の経過秒を同期
+            S.startedAt = data.startedAt ?? Date.now();
             el('timer-start').disabled = true;
-            S.interval = setInterval(() => { S.gameTime++; pushGameTime(); tick(); }, 1000);
+            clearInterval(S.interval);
+            S.interval = setInterval(() => { tick(); }, 1000);
         } else if (wasRunning && !S.running) {
             clearInterval(S.interval);
             el('timer-start').disabled = false;
@@ -554,10 +557,11 @@ function pushCooldown(cdKey, value) {
     localPush = true;
     update(fbRef(), { [`cooldowns/${cdKey}`]: value }).finally(() => { localPush = false; });
 }
-function pushGameTime()  { update(fbRef(), { gameTime: S.gameTime }); }
 function pushStarted() {
     localPush = true;
-    update(fbRef(), { running: true, gameTime: S.gameTime }).finally(() => { localPush = false; });
+    const startedAt = Date.now();
+    S.startedAt = startedAt;
+    update(fbRef(), { running: true, startedAt }).finally(() => { localPush = false; });
 }
 function pushEnemies() {
     update(fbRef(), { enemies: S.enemies.map(e => ({ championId: e.championId, spells: e.spells })) });
@@ -569,6 +573,7 @@ async function resetRoom() {
     if (!confirm('全員のデータをリセットしますか？')) return;
     clearInterval(S.interval);
     S.gameTime  = 0;
+    S.startedAt = null;
     S.running   = false;
     S.cooldowns = {};
     S.ultLevels = [1,1,1,1,1];
@@ -657,9 +662,10 @@ const S = {
     })),
     ultLevels: [1,1,1,1,1],
     gameTime: 0,
+    startedAt: null,  // Date.now() at start
     running: false,
     interval: null,
-    cooldowns: {},   // `${slot}_${key}` -> { usedAt, duration }
+    cooldowns: {},
 };
 
 // ═══════════════════════════════════════════════════
@@ -796,8 +802,9 @@ el('start-btn').addEventListener('click', startGame);
 function startGame() {
     hide('setup-phase');
     show('game-phase');
-    S.gameTime = 0;
-    S.running  = false;
+    S.gameTime  = 0;
+    S.startedAt = null;
+    S.running   = false;
     S.cooldowns = {};
     S.ultLevels = [1,1,1,1,1];
     clearInterval(S.interval);
@@ -995,10 +1002,14 @@ el('timer-start').addEventListener('click', () => {
     S.running = true;
     el('timer-start').disabled = true;
     pushStarted();
-    S.interval = setInterval(() => { S.gameTime++; pushGameTime(); tick(); }, 1000);
+    S.interval = setInterval(tick, 1000);
 });
 
 function tick() {
+    // startedAt から経過秒を計算（インターバルのずれを防ぐ）
+    if (S.running && S.startedAt) {
+        S.gameTime = Math.floor((Date.now() - S.startedAt) / 1000);
+    }
     const m = String(Math.floor(S.gameTime/60)).padStart(2,'0');
     const s = String(S.gameTime%60).padStart(2,'0');
     el('game-timer').textContent = `${m}:${s}`;
