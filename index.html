@@ -206,7 +206,6 @@
             font-variant-numeric: tabular-nums;
             min-width: 96px;
         }
-        .timer-btns { display: flex; gap: 6px; }
         .timer-btn {
             border: 1px solid var(--border-light);
             background: var(--bg-medium);
@@ -466,11 +465,7 @@
     <div class="timer-bar">
         <div class="timer-left">
             <div class="game-timer" id="game-timer">00:00</div>
-            <div class="timer-btns">
-                <button class="timer-btn primary" id="timer-toggle">▶</button>
-                <button class="timer-btn" id="timer-reset" title="リセット">↺</button>
-                <button class="timer-btn danger" id="back-btn" title="設定に戻る">←</button>
-            </div>
+            <button class="timer-btn primary" id="timer-start">▶</button>
         </div>
         <div class="timer-cd-list" id="timer-cd-list"></div>
     </div>
@@ -662,7 +657,7 @@ function startGame() {
     S.cooldowns = {};
     S.ultLevels = [1,1,1,1,1];
     clearInterval(S.interval);
-    el('timer-toggle').textContent = '▶';
+    el('timer-start').disabled = false;
     buildCIRow();
     buildTrackingGrid();
     buildCDList();
@@ -786,32 +781,11 @@ function spellName(id, fallback) {
 // ═══════════════════════════════════════════════════
 //  TIMER
 // ═══════════════════════════════════════════════════
-el('timer-toggle').addEventListener('click', () => {
-    if (S.running) {
-        S.running = false;
-        clearInterval(S.interval);
-        el('timer-toggle').textContent = '▶';
-    } else {
-        S.running = true;
-        el('timer-toggle').textContent = '⏸';
-        S.interval = setInterval(() => { S.gameTime++; tick(); }, 1000);
-    }
-});
-
-el('timer-reset').addEventListener('click', () => {
-    S.running = false;
-    clearInterval(S.interval);
-    S.gameTime = 0;
-    S.cooldowns = {};
-    el('timer-toggle').textContent = '▶';
-    tick();
-});
-
-el('back-btn').addEventListener('click', () => {
-    S.running = false;
-    clearInterval(S.interval);
-    hide('game-phase');
-    show('setup-phase');
+el('timer-start').addEventListener('click', () => {
+    if (S.running) return;
+    S.running = true;
+    el('timer-start').disabled = true;
+    S.interval = setInterval(() => { S.gameTime++; tick(); }, 1000);
 });
 
 function tick() {
