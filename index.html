@@ -567,12 +567,18 @@ function spellOpts(selected) {
         list.map(s => `<option value="${s.id}"${s.id===selected?' selected':''}>${s.name}</option>`).join('');
 }
 
+// ひらがな → カタカナ変換
+function toKatakana(str) {
+    return str.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+}
+
 function showDropdown(slot, query) {
     const dd = el(`dropdown-${slot}`);
-    const q = query.toLowerCase().trim();
+    const q     = query.toLowerCase().trim();
     if (!q) { dd.style.display = 'none'; return; }
+    const qKata = toKatakana(q);  // ひらがなをカタカナに変換してから日本語名と比較
     const matches = Object.values(S.champions)
-        .filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q))
+        .filter(c => c.name.toLowerCase().includes(qKata) || c.id.toLowerCase().includes(q))
         .slice(0, 8);
     if (!matches.length) { dd.style.display = 'none'; return; }
     dd.innerHTML = matches.map(c =>
