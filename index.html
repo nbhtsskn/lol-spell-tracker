@@ -587,34 +587,40 @@ async function resetRoom() {
 
 // Firebase購読 & 初期化
 async function setupFirebase() {
-    const snap = await get(fbRef());
-    const data = snap.val();
-    if (data?.enemies) {
-        data.enemies.forEach((e, i) => {
-            S.enemies[i].championId = e.championId ?? null;
-            S.enemies[i].spells     = e.spells ?? [null, null];
-            if (e.championId) {
-                fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/champion/${e.championId}.json`)
-                    .then(res => { S.enemies[i].championDetail = res.data[e.championId]; })
-                    .catch(() => {});
-            }
-        });
-    }
+    // onValue は購読開始時に即座に現在値で1回発火するので、それだけで初期化できる
+    // 直接 applyRemoteState を呼ぶと2重にインターバルが起動するため使わない
+    let first = true;
     onValue(fbRef(), snap => {
         if (localPush) return;
-        applyRemoteState(snap.val());
+        const data = snap.val();
+        if (first) {
+            first = false;
+            // チャンピオン詳細を先読み
+            if (data?.enemies) {
+                data.enemies.forEach((e, i) => {
+                    if (e?.championId) {
+                        fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/champion/${e.championId}.json`)
+                            .then(res => { S.enemies[i].championDetail = res.data[e.championId]; })
+                            .catch(() => {});
+                    }
+                });
+            }
+            applyRemoteState(data);
+            if (data?.running || data?.gameTime > 0) {
+                hide('setup-phase');
+                show('game-phase');
+                buildCIRow();
+                buildTrackingGrid();
+                buildCDList();
+            } else {
+                show('setup-phase');
+                buildSetup();
+            }
+            tick();
+        } else {
+            applyRemoteState(data);
+        }
     });
-    show('setup-phase');
-    buildSetup();
-    if (data?.running || data?.gameTime > 0) {
-        if (data) applyRemoteState(data);
-        hide('setup-phase');
-        show('game-phase');
-        buildCIRow();
-        buildTrackingGrid();
-        buildCDList();
-        tick();
-    }
 }
 
 // ═══════════════════════════════════════════════════
