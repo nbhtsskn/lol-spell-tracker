@@ -36,7 +36,7 @@
             padding: 10px 16px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
         }
         header h1 {
             font-size: 18px;
@@ -44,6 +44,22 @@
             letter-spacing: 3px;
             text-transform: uppercase;
         }
+        .reset-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--gold);
+            width: 38px;
+            height: 38px;
+            border-radius: 4px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        .reset-btn:hover, .reset-btn:active { background: rgba(200,170,110,0.2); border-color: var(--border-light); }
         /* ─── LOADING ─────────────────────────────── */
         #loading {
             text-align: center;
@@ -425,80 +441,18 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-        /* ─── ROOM UI ─────────────────────────────── */
-        #room-phase { display: none; }
-        .room-inner {
-            max-width: 400px;
-            margin: 60px auto;
-            padding: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            text-align: center;
-        }
-        .room-inner h2 {
-            font-size: 16px;
-            color: var(--gold-light);
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-        }
-        .room-id-display {
-            font-size: 40px;
-            font-weight: bold;
-            letter-spacing: 8px;
-            color: var(--available);
-            margin: 12px 0;
-        }
-        .room-hint { font-size: 12px; color: #777; margin-bottom: 20px; }
-        .room-input {
-            width: 100%;
-            background: var(--bg-medium);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 20px;
-            text-align: center;
-            letter-spacing: 6px;
-            outline: none;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-        .room-input:focus { border-color: var(--border-light); }
-        .room-divider { color: #555; margin: 16px 0; font-size: 12px; letter-spacing: 2px; }
-        .sync-badge {
-            display: inline-block;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-        .sync-badge.on  { background: rgba(11,196,190,0.2); color: var(--available); }
-        .sync-badge.off { background: rgba(200,100,100,0.2); color: #e84057; }
     </style>
 </head>
 <body>
 
 <!-- ─── HEADER ──────────────────────────────────────── -->
 <header>
-    <h1>LoL Spell Tracker<span class="sync-badge off" id="sync-badge">非同期</span></h1>
+    <h1>LoL Spell Tracker</h1>
+    <button class="reset-btn" id="reset-btn" title="リセット">↺</button>
 </header>
 
 <!-- ─── LOADING ─────────────────────────────────────── -->
 <div id="loading">データを読み込み中...</div>
-
-<!-- ─── ROOM PHASE ───────────────────────────────────── -->
-<div id="room-phase">
-    <div class="room-inner">
-        <h2>ルームに参加</h2>
-        <p class="room-hint">新しくルームを作るか、友達のルームIDを入力してください</p>
-        <button class="btn btn-primary btn-full" id="create-room-btn">新しいルームを作成</button>
-        <div class="room-divider">── または ──</div>
-        <input class="room-input" id="join-room-input" type="text" maxlength="4" placeholder="XXXX">
-        <button class="btn btn-full" id="join-room-btn">ルームに参加</button>
-    </div>
-</div>
 
 <!-- ─── SETUP PHASE ──────────────────────────────────── -->
 <div id="setup-phase">
@@ -509,9 +463,6 @@
         </div>
 
         <div class="start-btn-wrap">
-            <div style="text-align:center;font-size:12px;color:#777;margin-bottom:8px;">
-                ルームID: <span id="room-id-label" style="color:var(--available);letter-spacing:3px;font-weight:bold;"></span>
-            </div>
             <button class="btn btn-primary btn-full" id="start-btn" disabled>ゲーム開始</button>
         </div>
     </div>
@@ -539,9 +490,9 @@
 
 <script type="module">
 // ═══════════════════════════════════════════════════
-//  FIREBASE
+//  FIREBASE — 固定共有ルーム
 // ═══════════════════════════════════════════════════
-import { initializeApp }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getDatabase, ref, set, onValue, update, get }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
@@ -554,24 +505,16 @@ const firebaseConfig = {
     messagingSenderId: '802712487966',
     appId:             '1:802712487966:web:56907a41dac41568d1460f',
 };
-const fbApp = initializeApp(firebaseConfig);
-const db    = getDatabase(fbApp);
-
-let roomId    = null;
-let fbUnsub   = null;   // unsubscribe handle
-let localPush = false;  // 自分の書き込みでonValueが発火するのを無視するフラグ
-
-function roomRef()  { return ref(db, `rooms/${roomId}`); }
-
-function genRoomId() {
-    return Math.random().toString(36).slice(2, 6).toUpperCase();
-}
+const fbApp  = initializeApp(firebaseConfig);
+const db     = getDatabase(fbApp);
+const fbRef  = () => ref(db, 'rooms/shared');
+let localPush = false;
 
 // Firebase → ローカル反映
 function applyRemoteState(data) {
     if (!data) return;
     if (data.gameTime !== undefined) S.gameTime = data.gameTime;
-    if (data.running  !== undefined) {
+    if (data.running !== undefined) {
         const wasRunning = S.running;
         S.running = data.running;
         if (!wasRunning && S.running) {
@@ -582,8 +525,8 @@ function applyRemoteState(data) {
             el('timer-start').disabled = false;
         }
     }
-    if (data.cooldowns)  S.cooldowns  = data.cooldowns;
-    if (data.ultLevels)  {
+    if (data.cooldowns) S.cooldowns = data.cooldowns;
+    if (data.ultLevels) {
         S.ultLevels = data.ultLevels;
         S.ultLevels.forEach((lv, i) => {
             const sel = el(`ulv-${i}`);
@@ -595,7 +538,6 @@ function applyRemoteState(data) {
             if (e.championId && e.championId !== S.enemies[i].championId) {
                 S.enemies[i].championId = e.championId;
                 S.enemies[i].spells     = e.spells ?? [null, null];
-                // チャンピオン詳細を再取得
                 fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/champion/${e.championId}.json`)
                     .then(res => { S.enemies[i].championDetail = res.data[e.championId]; })
                     .catch(() => {});
@@ -607,76 +549,47 @@ function applyRemoteState(data) {
     tick();
 }
 
-// ローカル → Firebase 書き込み
+// ローカル → Firebase
 function pushCooldown(cdKey, value) {
-    if (!roomId) return;
     localPush = true;
-    update(roomRef(), { [`cooldowns/${cdKey}`]: value })
-        .finally(() => { localPush = false; });
+    update(fbRef(), { [`cooldowns/${cdKey}`]: value }).finally(() => { localPush = false; });
 }
-
-function pushGameTime() {
-    if (!roomId) return;
-    update(roomRef(), { gameTime: S.gameTime });
-}
-
+function pushGameTime()  { update(fbRef(), { gameTime: S.gameTime }); }
 function pushStarted() {
-    if (!roomId) return;
     localPush = true;
-    update(roomRef(), { running: true, gameTime: S.gameTime })
-        .finally(() => { localPush = false; });
+    update(fbRef(), { running: true, gameTime: S.gameTime }).finally(() => { localPush = false; });
 }
-
 function pushEnemies() {
-    if (!roomId) return;
-    const payload = S.enemies.map(e => ({
-        championId: e.championId,
-        spells: e.spells,
-    }));
-    update(roomRef(), { enemies: payload });
+    update(fbRef(), { enemies: S.enemies.map(e => ({ championId: e.championId, spells: e.spells })) });
 }
+function pushUltLevel(slot, lv) { update(fbRef(), { [`ultLevels/${slot}`]: lv }); }
 
-function pushUltLevel(slot, lv) {
-    if (!roomId) return;
-    update(roomRef(), { [`ultLevels/${slot}`]: lv });
-}
-
-// ルーム購読開始
-function subscribeRoom() {
-    if (fbUnsub) { fbUnsub(); fbUnsub = null; }
-    fbUnsub = onValue(roomRef(), snap => {
-        if (localPush) return;
-        applyRemoteState(snap.val());
-    });
-    el('sync-badge').textContent = roomId;
-    el('sync-badge').className   = 'sync-badge on';
-}
-
-// ルーム作成
-async function createRoom() {
-    roomId = genRoomId();
-    window.location.hash = roomId;
-    await set(roomRef(), {
+// リセット
+async function resetRoom() {
+    if (!confirm('全員のデータをリセットしますか？')) return;
+    clearInterval(S.interval);
+    S.gameTime  = 0;
+    S.running   = false;
+    S.cooldowns = {};
+    S.ultLevels = [1,1,1,1,1];
+    S.enemies.forEach(e => { e.championId = null; e.championDetail = null; e.spells = [null, null]; });
+    await set(fbRef(), {
         gameTime:  0,
         running:   false,
         cooldowns: {},
         ultLevels: [1,1,1,1,1],
-        enemies:   S.enemies.map(e => ({ championId: e.championId, spells: e.spells })),
+        enemies:   S.enemies.map(() => ({ championId: null, spells: [null, null] })),
     });
-    subscribeRoom();
-    el('room-id-label').textContent = roomId;
-    hide('room-phase');
+    hide('game-phase');
     show('setup-phase');
     buildSetup();
 }
 
-// ルーム参加
-async function joinRoom(id) {
-    roomId = id.toUpperCase();
-    window.location.hash = roomId;
-    const snap = await get(roomRef());
+// Firebase購読 & 初期化
+async function setupFirebase() {
+    const snap = await get(fbRef());
     const data = snap.val();
-    if (data && data.enemies) {
+    if (data?.enemies) {
         data.enemies.forEach((e, i) => {
             S.enemies[i].championId = e.championId ?? null;
             S.enemies[i].spells     = e.spells ?? [null, null];
@@ -687,15 +600,14 @@ async function joinRoom(id) {
             }
         });
     }
-    subscribeRoom();
-    el('room-id-label').textContent = roomId;
-    hide('room-phase');
+    onValue(fbRef(), snap => {
+        if (localPush) return;
+        applyRemoteState(snap.val());
+    });
     show('setup-phase');
     buildSetup();
-
-    // 既にゲーム中なら即ゲーム画面へ
     if (data?.running || data?.gameTime > 0) {
-        applyRemoteState(data);
+        if (data) applyRemoteState(data);
         hide('setup-phase');
         show('game-phase');
         buildCIRow();
@@ -703,28 +615,6 @@ async function joinRoom(id) {
         buildCDList();
         tick();
     }
-}
-
-// ─── ルームUI イベント ───
-function setupRoomUI() {
-    el('create-room-btn').addEventListener('click', createRoom);
-    el('join-room-btn').addEventListener('click', () => {
-        const v = el('join-room-input').value.trim();
-        if (v.length === 4) joinRoom(v);
-    });
-    el('join-room-input').addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-            const v = el('join-room-input').value.trim();
-            if (v.length === 4) joinRoom(v);
-        }
-    });
-    // URLハッシュにルームIDがあれば自動参加
-    const hash = window.location.hash.slice(1).toUpperCase();
-    if (/^[A-Z0-9]{4}$/.test(hash)) {
-        joinRoom(hash);
-        return;
-    }
-    show('room-phase');
 }
 
 // ═══════════════════════════════════════════════════
@@ -782,7 +672,8 @@ async function init() {
         S.summonerSpells = spellsRes.data;
 
         hide('loading');
-        setupRoomUI();
+        el('reset-btn').addEventListener('click', resetRoom);
+        setupFirebase();
     } catch(e) {
         el('loading').textContent = 'データ読み込み失敗。ページを再読み込みしてください。';
         console.error(e);
@@ -905,16 +796,13 @@ function startGame() {
     S.ultLevels = [1,1,1,1,1];
     clearInterval(S.interval);
     el('timer-start').disabled = false;
-    // Firebaseにリセット状態を書き込む
-    if (roomId) {
-        update(roomRef(), {
-            gameTime:  0,
-            running:   false,
-            cooldowns: {},
-            ultLevels: [1,1,1,1,1],
-            enemies: S.enemies.map(e => ({ championId: e.championId, spells: e.spells })),
-        });
-    }
+    update(fbRef(), {
+        gameTime:  0,
+        running:   false,
+        cooldowns: {},
+        ultLevels: [1,1,1,1,1],
+        enemies: S.enemies.map(e => ({ championId: e.championId, spells: e.spells })),
+    });
     buildCIRow();
     buildTrackingGrid();
     buildCDList();
@@ -1234,6 +1122,7 @@ function fmt(sec) {
 window.useSpell     = useSpell;
 window.useTopTimer  = useTopTimer;
 window.pushUltLevel = pushUltLevel;
+window.resetRoom    = resetRoom;
 
 // ═══════════════════════════════════════════════════
 //  START
