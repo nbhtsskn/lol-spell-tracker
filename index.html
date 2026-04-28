@@ -183,36 +183,39 @@
         /* Timer bar - sticky */
         .timer-bar {
             position: sticky;
-            top: 58px; /* below header */
+            top: 58px;
             z-index: 90;
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
-            padding: 10px 16px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
+        }
+        .timer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
         .game-timer {
-            font-size: 44px;
+            font-size: 36px;
             font-weight: bold;
             color: var(--gold-light);
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             font-variant-numeric: tabular-nums;
-            flex-shrink: 0;
-            min-width: 120px;
+            min-width: 96px;
         }
-        .timer-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .timer-btns { display: flex; gap: 6px; }
         .timer-btn {
-            padding: 10px 16px;
             border: 1px solid var(--border-light);
             background: var(--bg-medium);
             color: var(--gold);
             cursor: pointer;
             border-radius: 4px;
-            font-size: 20px;
-            min-width: 48px;
-            min-height: 48px;
+            font-size: 18px;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -222,11 +225,60 @@
         .timer-btn.primary {
             background: linear-gradient(180deg, #785a28, #463714);
             color: var(--gold-light);
-            font-size: 22px;
-            padding: 10px 20px;
         }
         .timer-btn.danger { border-color: #e84057; color: #e84057; }
         .timer-btn.danger:hover, .timer-btn.danger:active { background: rgba(232,64,87,0.15); }
+
+        /* CD overview (right of timer) */
+        .timer-cd-list {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            border-left: 1px solid var(--border);
+            padding-left: 12px;
+        }
+        .cd-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-variant-numeric: tabular-nums;
+        }
+        .cd-portrait {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+        .cd-portrait img { width: 100%; height: 100%; object-fit: cover; }
+        .cd-name {
+            width: 52px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex-shrink: 0;
+            color: var(--gold-light);
+            font-size: 11px;
+        }
+        .cd-spells {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+        .cd-spell {
+            flex: 1;
+            text-align: center;
+            font-size: 10px;
+            padding: 1px 2px;
+            border-radius: 3px;
+            background: var(--bg-medium);
+        }
+        .cd-spell.ok  { color: var(--available); }
+        .cd-spell.cd  { color: #bbb; background: rgba(0,0,0,0.3); }
 
         /* CI row */
         .ci-row {
@@ -412,12 +464,15 @@
 <div id="game-phase">
     <!-- Timer (sticky) -->
     <div class="timer-bar">
-        <div class="game-timer" id="game-timer">00:00</div>
-        <div class="timer-btns">
-            <button class="timer-btn primary" id="timer-toggle">▶</button>
-            <button class="timer-btn" id="timer-reset" title="リセット">↺</button>
-            <button class="timer-btn danger" id="back-btn" title="設定に戻る">←</button>
+        <div class="timer-left">
+            <div class="game-timer" id="game-timer">00:00</div>
+            <div class="timer-btns">
+                <button class="timer-btn primary" id="timer-toggle">▶</button>
+                <button class="timer-btn" id="timer-reset" title="リセット">↺</button>
+                <button class="timer-btn danger" id="back-btn" title="設定に戻る">←</button>
+            </div>
         </div>
+        <div class="timer-cd-list" id="timer-cd-list"></div>
     </div>
     <!-- Cosmic Insight row -->
     <div class="ci-row" id="ci-row">
@@ -610,7 +665,50 @@ function startGame() {
     el('timer-toggle').textContent = '▶';
     buildCIRow();
     buildTrackingGrid();
+    buildCDList();
     tick();
+}
+
+function buildCDList() {
+    const list = el('timer-cd-list');
+    list.innerHTML = '';
+    S.enemies.forEach((enemy, i) => {
+        const champ = S.champions[enemy.championId];
+        const row = document.createElement('div');
+        row.className = 'cd-row';
+        row.innerHTML = `
+            <div class="cd-portrait"><img src="${champIcon(enemy.championId)}" alt="" loading="lazy"></div>
+            <div class="cd-name">${champ?.name ?? ''}</div>
+            <div class="cd-spells">
+                <span class="cd-spell ok" id="cd-${i}-ult">R</span>
+                <span class="cd-spell ok" id="cd-${i}-s0">D</span>
+                <span class="cd-spell ok" id="cd-${i}-s1">F</span>
+            </div>`;
+        list.appendChild(row);
+    });
+}
+
+function updateCDList() {
+    S.enemies.forEach((_, i) => {
+        [['ult','R'], ['s0','D'], ['s1','F']].forEach(([key, label]) => {
+            const span = el(`cd-${i}-${key}`);
+            if (!span) return;
+            const data = S.cooldowns[`${i}_${key}`];
+            if (!data) {
+                span.className = 'cd-spell ok';
+                span.textContent = label;
+            } else {
+                const remaining = (data.usedAt + data.duration) - S.gameTime;
+                if (remaining <= 0) {
+                    span.className = 'cd-spell ok';
+                    span.textContent = label;
+                } else {
+                    span.className = 'cd-spell cd';
+                    span.textContent = fmt(remaining);
+                }
+            }
+        });
+    });
 }
 
 function buildCIRow() {
@@ -725,6 +823,7 @@ function tick() {
         refreshSpell(i,'s0');
         refreshSpell(i,'s1');
     });
+    updateCDList();
 }
 
 // ═══════════════════════════════════════════════════
