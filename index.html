@@ -28,416 +28,203 @@
 
         /* ─── HEADER ─────────────────────────────── */
         header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: sticky; top: 0; z-index: 100;
             background: linear-gradient(180deg, #000 0%, var(--bg-medium) 100%);
             border-bottom: 2px solid var(--border-light);
             padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between;
         }
-        header h1 {
-            font-size: 18px;
-            color: var(--gold-light);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
+        header h1 { font-size: 18px; color: var(--gold-light); letter-spacing: 3px; text-transform: uppercase; }
         .reset-btn {
-            background: none;
-            border: 1px solid var(--border);
-            color: var(--gold);
-            width: 38px;
-            height: 38px;
-            border-radius: 4px;
-            font-size: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-            flex-shrink: 0;
+            background: none; border: 1px solid var(--border); color: var(--gold);
+            width: 38px; height: 38px; border-radius: 4px; font-size: 20px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s; flex-shrink: 0;
         }
         .reset-btn:hover, .reset-btn:active { background: rgba(200,170,110,0.2); border-color: var(--border-light); }
+
         /* ─── LOADING ─────────────────────────────── */
-        #loading {
-            text-align: center;
-            padding: 60px 20px;
-            font-size: 15px;
-            opacity: 0.7;
-        }
+        #loading { text-align: center; padding: 60px 20px; font-size: 15px; opacity: 0.7; }
 
         /* ─── BUTTONS ─────────────────────────────── */
         .btn {
-            padding: 10px 20px;
-            border: 1px solid var(--border-light);
-            background: var(--bg-medium);
-            color: var(--gold);
-            cursor: pointer;
-            border-radius: 3px;
-            font-size: 14px;
-            transition: background 0.15s;
-            letter-spacing: 1px;
+            padding: 10px 20px; border: 1px solid var(--border-light);
+            background: var(--bg-medium); color: var(--gold);
+            cursor: pointer; border-radius: 3px; font-size: 14px;
+            transition: background 0.15s; letter-spacing: 1px;
         }
         .btn:hover:not(:disabled) { background: rgba(200,170,110,0.2); }
         .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-        .btn-primary {
-            background: linear-gradient(180deg, #785a28, #463714);
-            color: var(--gold-light);
-            border-color: var(--border-light);
-        }
+        .btn-primary { background: linear-gradient(180deg, #785a28, #463714); color: var(--gold-light); border-color: var(--border-light); }
         .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #c8aa6e, #785a28); color: #000; }
-        .btn-danger { border-color: #e84057; color: #e84057; }
-        .btn-danger:hover:not(:disabled) { background: rgba(232,64,87,0.15); }
         .btn-full { width: 100%; }
+
+        /* ─── MODE SELECTION ──────────────────────── */
+        .mode-select-section { padding: 20px 16px 16px; text-align: center; }
+        .mode-label { font-size: 12px; color: var(--gold); letter-spacing: 2px; margin-bottom: 14px; opacity: 0.7; text-transform: uppercase; }
+        .mode-btn-row { display: flex; gap: 10px; justify-content: center; }
+        .mode-btn {
+            padding: 12px 0; width: 72px;
+            border: 2px solid var(--border); background: var(--bg-card); color: var(--gold);
+            cursor: pointer; border-radius: 4px; font-size: 15px; font-weight: bold;
+            letter-spacing: 2px; transition: all 0.15s;
+        }
+        .mode-btn:hover { border-color: var(--border-light); background: rgba(200,170,110,0.1); }
+        .mode-btn.selected { border-color: var(--available); color: var(--available); background: rgba(11,196,190,0.1); }
 
         /* ─── SETUP PHASE ─────────────────────────── */
         #setup-phase { display: none; }
         .setup-inner { max-width: 1400px; margin: 0 auto; padding: 12px; }
+        .champs-scroll-inner { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        @media (min-width: 600px) { .champs-scroll-inner { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 900px) { .champs-scroll-inner { grid-template-columns: repeat(5, 1fr); } }
 
-        .champs-scroll-wrap { }
-        .champs-scroll-inner {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-        @media (min-width: 600px) {
-            .champs-scroll-inner { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (min-width: 900px) {
-            .champs-scroll-inner { grid-template-columns: repeat(5, 1fr); }
-        }
-        .champion-setup-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 10px;
-        }
-        .card-title {
-            font-size: 11px;
-            text-align: center;
-            color: var(--gold-light);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
+        .champion-setup-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; }
+        .card-title { font-size: 11px; text-align: center; color: var(--gold-light); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
         .champion-portrait-setup {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 10px;
-            background: var(--bg-medium);
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            opacity: 0.4;
-            cursor: pointer;
+            width: 64px; height: 64px; margin: 0 auto 10px;
+            background: var(--bg-medium); border: 2px solid var(--border); border-radius: 50%;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; opacity: 0.4; cursor: pointer;
         }
         .champion-portrait-setup.filled { opacity: 1; }
         .champion-portrait-setup img { width: 100%; height: 100%; object-fit: cover; }
         .search-container { position: relative; margin-bottom: 10px; }
         .search-input {
-            width: 100%;
-            background: var(--bg-medium);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            padding: 8px 10px;
-            border-radius: 3px;
-            font-size: 13px;
-            outline: none;
+            width: 100%; background: var(--bg-medium); border: 1px solid var(--border);
+            color: var(--gold); padding: 8px 10px; border-radius: 3px; font-size: 13px; outline: none;
         }
         .search-input:focus { border-color: var(--border-light); }
         .search-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #0d1b2a;
-            border: 1px solid var(--border-light);
-            border-radius: 3px;
-            max-height: 160px;
-            overflow-y: auto;
-            z-index: 200;
-            display: none;
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #0d1b2a; border: 1px solid var(--border-light);
+            border-radius: 3px; max-height: 160px; overflow-y: auto; z-index: 200; display: none;
         }
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 10px;
-            cursor: pointer;
-            font-size: 13px;
-        }
+        .dropdown-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; font-size: 13px; }
         .dropdown-item:hover, .dropdown-item:active { background: rgba(200,170,110,0.2); }
         .dropdown-item img { width: 24px; height: 24px; border-radius: 3px; }
         .spells-row { display: flex; gap: 6px; }
         .spell-select-wrap { flex: 1; }
         .spell-select-wrap label { font-size: 10px; display: block; margin-bottom: 3px; opacity: 0.6; }
         .spell-select {
-            width: 100%;
-            background: var(--bg-medium);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            padding: 5px 4px;
-            border-radius: 3px;
-            font-size: 11px;
-            outline: none;
+            width: 100%; background: var(--bg-medium); border: 1px solid var(--border);
+            color: var(--gold); padding: 5px 4px; border-radius: 3px; font-size: 11px; outline: none;
         }
-
-        .start-btn-wrap {
-            margin-top: 16px;
-            padding: 0 0 24px;
-        }
+        .start-btn-wrap { margin-top: 16px; padding: 0 0 24px; }
 
         /* ─── GAME PHASE ──────────────────────────── */
         #game-phase { display: none; }
-
-        /* Timer bar - sticky */
         .timer-bar {
-            position: sticky;
-            top: 58px;
-            z-index: 90;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            padding: 8px 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            position: sticky; top: 58px; z-index: 90;
+            background: var(--bg-card); border-bottom: 1px solid var(--border);
+            padding: 8px 12px; display: flex; align-items: center; gap: 12px;
         }
-        .timer-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
+        .timer-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .game-timer {
-            font-size: 36px;
-            font-weight: bold;
-            color: var(--gold-light);
-            letter-spacing: 3px;
-            font-variant-numeric: tabular-nums;
-            min-width: 96px;
+            font-size: 36px; font-weight: bold; color: var(--gold-light);
+            letter-spacing: 3px; font-variant-numeric: tabular-nums; min-width: 96px;
         }
         .timer-btn {
-            border: 1px solid var(--border-light);
-            background: var(--bg-medium);
-            color: var(--gold);
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 18px;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
+            border: 1px solid var(--border-light); background: var(--bg-medium); color: var(--gold);
+            cursor: pointer; border-radius: 4px; font-size: 18px; width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center; transition: background 0.15s;
         }
         .timer-btn:hover, .timer-btn:active { background: rgba(200,170,110,0.2); }
-        .timer-btn.primary {
-            background: linear-gradient(180deg, #785a28, #463714);
-            color: var(--gold-light);
-        }
-        .timer-btn.danger { border-color: #e84057; color: #e84057; }
-        .timer-btn.danger:hover, .timer-btn.danger:active { background: rgba(232,64,87,0.15); }
+        .timer-btn.primary { background: linear-gradient(180deg, #785a28, #463714); color: var(--gold-light); }
 
-        /* CD overview (right of timer) */
         .timer-cd-list {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            border-left: 1px solid var(--border);
-            padding-left: 12px;
+            flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;
+            border-left: 1px solid var(--border); padding-left: 12px;
         }
-        .cd-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            font-variant-numeric: tabular-nums;
-        }
-        .cd-portrait {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-            border: 1px solid var(--border);
-        }
+        .cd-row { display: flex; align-items: center; gap: 6px; font-size: 11px; font-variant-numeric: tabular-nums; }
+        .cd-portrait { width: 22px; height: 22px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 1px solid var(--border); }
         .cd-portrait img { width: 100%; height: 100%; object-fit: cover; }
+        .cd-spells { display: flex; gap: 4px; flex: 1; }
+        .cd-spell { flex: 1; text-align: center; font-size: 10px; padding: 1px 2px; border-radius: 3px; background: var(--bg-medium); }
+        .cd-spell.ok { color: var(--available); }
+        .cd-spell.cd { color: #bbb; background: rgba(0,0,0,0.3); }
 
-        .cd-spells {
-            display: flex;
-            gap: 4px;
-            flex: 1;
-        }
-        .cd-spell {
-            flex: 1;
-            text-align: center;
-            font-size: 10px;
-            padding: 1px 2px;
-            border-radius: 3px;
-            background: var(--bg-medium);
-        }
-        .cd-spell.ok  { color: var(--available); }
-        .cd-spell.cd  { color: #bbb; background: rgba(0,0,0,0.3); }
-
-        /* CI row */
         .ci-row {
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            background: var(--bg-medium);
-            border-bottom: 1px solid var(--border);
+            padding: 8px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+            background: var(--bg-medium); border-bottom: 1px solid var(--border);
         }
         .ci-row-label { font-size: 11px; color: #777; white-space: nowrap; }
-        .ci-toggle {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 13px;
-            cursor: pointer;
-        }
+        .ci-toggle { display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer; }
         .ci-toggle input { accent-color: var(--available); width: 16px; height: 16px; }
 
-        /* Champion tracking cards */
         .tracking-scroll-wrap { padding: 8px 12px; }
-        .tracking-scroll-inner {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .tracking-scroll-inner { display: flex; flex-direction: column; gap: 8px; }
         @media (min-width: 900px) {
             .tracking-scroll-wrap { padding: 16px; }
-            .tracking-scroll-inner {
-                display: grid;
-                grid-template-columns: repeat(5, 1fr);
-                gap: 12px;
-            }
+            .tracking-scroll-inner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
         }
 
-        /* Champion card */
-        .champ-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            overflow: hidden;
-        }
+        .champ-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
         .champ-card-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: rgba(200,170,110,0.06);
-            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+            background: rgba(200,170,110,0.06); border-bottom: 1px solid var(--border);
         }
-        .champ-portrait-game {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid var(--border-light);
-            overflow: hidden;
-            flex-shrink: 0;
-        }
+        .champ-portrait-game { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border-light); overflow: hidden; flex-shrink: 0; }
         .champ-portrait-game img { width: 100%; height: 100%; object-fit: cover; }
         .champ-name { font-size: 14px; color: var(--gold-light); font-weight: bold; }
 
-        /* Spells: 3列グリッド */
-        .spells-body {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            padding: 8px;
-        }
+        .spells-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; }
+        .spells-body.two-col { grid-template-columns: repeat(2, 1fr); }
 
-        /* Spell column */
         .spell-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 4px;
-            padding: 8px 4px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: var(--bg-medium);
-            transition: border-color 0.3s, opacity 0.3s;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            gap: 4px; padding: 8px 4px; border: 1px solid var(--border); border-radius: 4px;
+            background: var(--bg-medium); transition: border-color 0.3s, opacity 0.3s;
         }
         .spell-col.available { border-color: var(--available); }
         .spell-col.on-cd { opacity: 0.75; border-color: #444; }
 
         .spell-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 4px;
-            background: var(--bg-dark);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: bold;
-            color: var(--gold);
-            flex-shrink: 0;
+            width: 38px; height: 38px; border-radius: 4px; background: var(--bg-dark); overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: bold; color: var(--gold); flex-shrink: 0;
         }
         .spell-icon img { width: 100%; height: 100%; object-fit: cover; }
-
-        .spell-name-label {
-            font-size: 10px;
-            color: var(--gold-light);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
-        }
+        .spell-name-label { font-size: 10px; color: var(--gold-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .spell-status { font-size: 11px; font-variant-numeric: tabular-nums; }
         .spell-status.ok { color: var(--available); }
         .spell-status.cd { color: var(--cd-color); }
         .spell-avail-at { font-size: 10px; color: #666; font-variant-numeric: tabular-nums; }
 
         .use-btn {
-            width: 100%;
-            padding: 7px 4px;
-            min-height: 40px;
-            border: 1px solid var(--border-light);
-            background: var(--bg-dark);
-            color: var(--gold);
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: bold;
-            transition: background 0.15s;
+            width: 100%; padding: 7px 4px; min-height: 40px;
+            border: 1px solid var(--border-light); background: var(--bg-dark); color: var(--gold);
+            cursor: pointer; border-radius: 4px; font-size: 13px; font-weight: bold; transition: background 0.15s;
         }
         .use-btn:hover:not(:disabled), .use-btn:active:not(:disabled) { background: rgba(200,170,110,0.3); }
         .use-btn:disabled { opacity: 0.25; cursor: not-allowed; }
         .use-btn.ult { border-color: #e2c45a; color: #e2c45a; }
         .use-btn.ult:hover:not(:disabled), .use-btn.ult:active:not(:disabled) { background: rgba(226,196,90,0.2); }
 
-        .ult-level-row {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            font-size: 10px;
-            color: #777;
-        }
+        .ult-level-row { display: flex; align-items: center; gap: 3px; font-size: 10px; color: #777; }
         .ult-lv-select {
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            padding: 2px 2px;
-            border-radius: 3px;
-            font-size: 11px;
-            width: 36px;
+            background: var(--bg-dark); border: 1px solid var(--border);
+            color: var(--gold); padding: 2px; border-radius: 3px; font-size: 11px; width: 36px;
         }
 
-        /* scrollbar */
+        /* ─── GANK ALERT ──────────────────────────── */
+        #gank-alert {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #c0392b, #e84057);
+            color: #fff; padding: 20px 32px; border-radius: 10px;
+            font-size: 20px; font-weight: bold; z-index: 9999; text-align: center;
+            box-shadow: 0 4px 24px rgba(232,64,87,0.6);
+            animation: alertPop 0.3s ease-out;
+            border: 2px solid rgba(255,255,255,0.3);
+            pointer-events: none;
+        }
+        #gank-alert .alert-sub { font-size: 13px; opacity: 0.85; margin-top: 6px; font-weight: normal; }
+        @keyframes alertPop {
+            from { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+            to   { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+        }
+
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -445,32 +232,34 @@
 </head>
 <body>
 
-<!-- ─── HEADER ──────────────────────────────────────── -->
 <header>
     <h1>LoL Spell Tracker</h1>
     <button class="reset-btn" id="reset-btn" title="リセット">↺</button>
 </header>
 
-<!-- ─── LOADING ─────────────────────────────────────── -->
 <div id="loading">データを読み込み中...</div>
 
-<!-- ─── SETUP PHASE ──────────────────────────────────── -->
 <div id="setup-phase">
     <div class="setup-inner">
-        <!-- 5 champion cards -->
-        <div class="champs-scroll-wrap">
-            <div class="champs-scroll-inner" id="champions-grid"></div>
+        <div class="mode-select-section">
+            <div class="mode-label">あなたのロールを選択</div>
+            <div class="mode-btn-row">
+                <button class="mode-btn" data-mode="top">TOP</button>
+                <button class="mode-btn" data-mode="mid">MID</button>
+                <button class="mode-btn" data-mode="jg">JG</button>
+                <button class="mode-btn" data-mode="bot">BOT</button>
+            </div>
         </div>
-
-        <div class="start-btn-wrap">
-            <button class="btn btn-primary btn-full" id="start-btn" disabled>ゲーム開始</button>
+        <div id="enemy-setup" style="display:none;">
+            <div class="champs-scroll-inner" id="champions-grid"></div>
+            <div class="start-btn-wrap">
+                <button class="btn btn-primary btn-full" id="start-btn" disabled>ゲーム開始</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- ─── GAME PHASE ────────────────────────────────────── -->
 <div id="game-phase">
-    <!-- Timer (sticky) -->
     <div class="timer-bar">
         <div class="timer-left">
             <div class="game-timer" id="game-timer">00:00</div>
@@ -478,22 +267,17 @@
         </div>
         <div class="timer-cd-list" id="timer-cd-list"></div>
     </div>
-    <!-- Cosmic Insight row -->
     <div class="ci-row" id="ci-row">
         <span class="ci-row-label">コズミックインサイト:</span>
     </div>
-    <!-- Tracking cards -->
     <div class="tracking-scroll-wrap">
         <div class="tracking-scroll-inner" id="tracking-grid"></div>
     </div>
 </div>
 
 <script type="module">
-// ═══════════════════════════════════════════════════
-//  FIREBASE — 固定共有ルーム
-// ═══════════════════════════════════════════════════
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getDatabase, ref, set, onValue, update, get }
+import { getDatabase, ref, set, onValue, update }
     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
 const firebaseConfig = {
@@ -505,24 +289,60 @@ const firebaseConfig = {
     messagingSenderId: '802712487966',
     appId:             '1:802712487966:web:56907a41dac41568d1460f',
 };
-const fbApp  = initializeApp(firebaseConfig);
-const db     = getDatabase(fbApp);
-const fbRef  = () => ref(db, 'rooms/shared');
+const fbApp = initializeApp(firebaseConfig);
+const db    = getDatabase(fbApp);
+const fbRef = () => ref(db, 'rooms/shared');
 let localPush = false;
 
-// Firebase → ローカル反映
+// ─── MODE CONFIG ─────────────────────────────────────
+const MODE_SLOTS = { top: 1, mid: 1, jg: 5, bot: 2 };
+const MODE_LABELS = {
+    top: ['TOP 対面'],
+    mid: ['MID 対面'],
+    jg:  ['敵1','敵2','敵3','敵4','敵5'],
+    bot: ['BOT ADC','BOT SUP'],
+};
+const MODE_SHORT = {
+    top: ['TOP'],
+    mid: ['MID'],
+    jg:  ['敵1','敵2','敵3','敵4','敵5'],
+    bot: ['ADC','SUP'],
+};
+
+function activeSlotCount() { return MODE_SLOTS[S.mode] ?? 5; }
+function slotLabel(i)      { return (MODE_LABELS[S.mode] ?? MODE_LABELS.jg)[i] ?? `敵${i+1}`; }
+function slotShort(i)      { return (MODE_SHORT[S.mode]  ?? MODE_SHORT.jg)[i]  ?? `敵${i+1}`; }
+
+// ─── STATE ───────────────────────────────────────────
+const S = {
+    version: null,
+    champions: {},
+    summonerSpells: {},
+    mode: null,
+    enemies: Array.from({length:5}, (_, i) => ({
+        slot: i, championId: null, championDetail: null, spells: [null, null], ci: false,
+    })),
+    ultLevels: [1,1,1,1,1],
+    gameTime: 0,
+    startedAt: null,
+    running: false,
+    interval: null,
+    cooldowns: {},
+    gankAlerted: false,
+};
+
+// ─── FIREBASE ────────────────────────────────────────
 function applyRemoteState(data) {
     if (!data) return;
-    // タイマー: startedAt から経過秒を計算（毎秒pushしない）
+    if (data.mode !== undefined) S.mode = data.mode;
     if (data.running !== undefined) {
         const wasRunning = S.running;
         S.running = data.running;
         if (!wasRunning && S.running) {
-            // 開始時刻から現在の経過秒を同期
             S.startedAt = data.startedAt ?? Date.now();
             el('timer-start').disabled = true;
             clearInterval(S.interval);
-            S.interval = setInterval(() => { tick(); }, 1000);
+            S.interval = setInterval(tick, 1000);
         } else if (wasRunning && !S.running) {
             clearInterval(S.interval);
             el('timer-start').disabled = false;
@@ -531,10 +351,7 @@ function applyRemoteState(data) {
     if (data.cooldowns) S.cooldowns = data.cooldowns;
     if (data.ultLevels) {
         S.ultLevels = data.ultLevels;
-        S.ultLevels.forEach((lv, i) => {
-            const sel = el(`ulv-${i}`);
-            if (sel) sel.value = lv;
-        });
+        S.ultLevels.forEach((lv, i) => { const sel = el(`ulv-${i}`); if (sel) sel.value = lv; });
     }
     if (data.enemies) {
         data.enemies.forEach((e, i) => {
@@ -552,7 +369,6 @@ function applyRemoteState(data) {
     tick();
 }
 
-// ローカル → Firebase
 function pushCooldown(cdKey, value) {
     localPush = true;
     update(fbRef(), { [`cooldowns/${cdKey}`]: value }).finally(() => { localPush = false; });
@@ -568,39 +384,29 @@ function pushEnemies() {
 }
 function pushUltLevel(slot, lv) { update(fbRef(), { [`ultLevels/${slot}`]: lv }); }
 
-// リセット
 async function resetRoom() {
     if (!confirm('全員のデータをリセットしますか？')) return;
     clearInterval(S.interval);
-    S.gameTime  = 0;
-    S.startedAt = null;
-    S.running   = false;
-    S.cooldowns = {};
-    S.ultLevels = [1,1,1,1,1];
-    S.enemies.forEach(e => { e.championId = null; e.championDetail = null; e.spells = [null, null]; });
+    S.gameTime = 0; S.startedAt = null; S.running = false;
+    S.cooldowns = {}; S.ultLevels = [1,1,1,1,1];
+    S.mode = null; S.gankAlerted = false;
+    S.enemies.forEach(e => { e.championId = null; e.championDetail = null; e.spells = [null, null]; e.ci = false; });
     await set(fbRef(), {
-        gameTime:  0,
-        running:   false,
-        cooldowns: {},
-        ultLevels: [1,1,1,1,1],
-        enemies:   S.enemies.map(() => ({ championId: null, spells: [null, null] })),
+        mode: null, gameTime: 0, running: false, cooldowns: {}, ultLevels: [1,1,1,1,1],
+        enemies: S.enemies.map(() => ({ championId: null, spells: [null, null] })),
     });
     hide('game-phase');
     show('setup-phase');
     buildSetup();
 }
 
-// Firebase購読 & 初期化
 async function setupFirebase() {
-    // onValue は購読開始時に即座に現在値で1回発火するので、それだけで初期化できる
-    // 直接 applyRemoteState を呼ぶと2重にインターバルが起動するため使わない
     let first = true;
     onValue(fbRef(), snap => {
         if (localPush) return;
         const data = snap.val();
         if (first) {
             first = false;
-            // チャンピオン詳細を先読み
             if (data?.enemies) {
                 data.enemies.forEach((e, i) => {
                     if (e?.championId) {
@@ -612,14 +418,10 @@ async function setupFirebase() {
             }
             applyRemoteState(data);
             if (data?.running || data?.gameTime > 0) {
-                hide('setup-phase');
-                show('game-phase');
-                buildCIRow();
-                buildTrackingGrid();
-                buildCDList();
+                hide('setup-phase'); show('game-phase');
+                buildCIRow(); buildTrackingGrid(); buildCDList();
             } else {
-                show('setup-phase');
-                buildSetup();
+                show('setup-phase'); buildSetup();
             }
             tick();
         } else {
@@ -628,13 +430,10 @@ async function setupFirebase() {
     });
 }
 
-// ═══════════════════════════════════════════════════
-//  CONSTANTS & HELPERS
-// ═══════════════════════════════════════════════════
+// ─── HELPERS ─────────────────────────────────────────
 const DDragon = 'https://ddragon.leagueoflegends.com';
-
-function champIcon(id)   { return `${DDragon}/cdn/${S.version}/img/champion/${id}.png`; }
-function spellImg(full)  { return `${DDragon}/cdn/${S.version}/img/spell/${full}`; }
+function champIcon(id)  { return `${DDragon}/cdn/${S.version}/img/champion/${id}.png`; }
+function spellImg(full) { return `${DDragon}/cdn/${S.version}/img/spell/${full}`; }
 function show(id) { document.getElementById(id).style.display = 'block'; }
 function hide(id) { document.getElementById(id).style.display = 'none'; }
 function el(id)   { return document.getElementById(id); }
@@ -646,43 +445,17 @@ async function fetchJSON(url) {
     return d;
 }
 
-// ═══════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════
-const S = {
-    version: null,
-    champions: {},        // id -> basic info
-    summonerSpells: {},   // id -> spell info
-    enemies: Array.from({length:5}, (_, i) => ({
-        slot: i,
-        championId: null,
-        championDetail: null,
-        spells: [null, null],
-        ci: false,
-    })),
-    ultLevels: [1,1,1,1,1],
-    gameTime: 0,
-    startedAt: null,  // Date.now() at start
-    running: false,
-    interval: null,
-    cooldowns: {},
-};
-
-// ═══════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════
+// ─── INIT ────────────────────────────────────────────
 async function init() {
     try {
         const versions = await fetchJSON(`${DDragon}/api/versions.json`);
         S.version = versions[0];
-
         const [champsRes, spellsRes] = await Promise.all([
             fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/champion.json`),
             fetchJSON(`${DDragon}/cdn/${S.version}/data/ja_JP/summoner.json`),
         ]);
-        S.champions = champsRes.data;
+        S.champions      = champsRes.data;
         S.summonerSpells = spellsRes.data;
-
         hide('loading');
         el('reset-btn').addEventListener('click', resetRoom);
         setupFirebase();
@@ -692,50 +465,81 @@ async function init() {
     }
 }
 
-// ═══════════════════════════════════════════════════
-//  SETUP RENDERING
-// ═══════════════════════════════════════════════════
+// ─── SETUP RENDERING ─────────────────────────────────
 function buildSetup() {
     const grid = el('champions-grid');
     grid.innerHTML = '';
-    S.enemies.forEach((enemy, i) => {
-        const card = document.createElement('div');
-        card.className = 'champion-setup-card';
-        const champName = enemy.championId ? (S.champions[enemy.championId]?.name ?? enemy.championId) : '';
-        card.innerHTML = `
-            <div class="card-title">敵 ${i+1}</div>
-            <div class="champion-portrait-setup ${enemy.championId ? 'filled' : ''}" id="portrait-setup-${i}">
-                ${enemy.championId
-                    ? `<img src="${champIcon(enemy.championId)}" alt="${champName}" loading="lazy">`
-                    : '?'}
-            </div>
-            <div class="search-container">
-                <input class="search-input" id="search-${i}" type="text"
-                    placeholder="チャンピオン..." autocomplete="off"
-                    value="${champName}">
-                <div class="search-dropdown" id="dropdown-${i}"></div>
-            </div>
-            <div class="spells-row">
-                <div class="spell-select-wrap">
-                    <label>D</label>
-                    <select class="spell-select" id="ss0-${i}">${spellOpts(enemy.spells[0])}</select>
-                </div>
-                <div class="spell-select-wrap">
-                    <label>F</label>
-                    <select class="spell-select" id="ss1-${i}">${spellOpts(enemy.spells[1])}</select>
-                </div>
-            </div>
-        `;
-        grid.appendChild(card);
+    el('enemy-setup').style.display = 'none';
 
-        const input = el(`search-${i}`);
-        input.addEventListener('input',  () => showDropdown(i, input.value));
-        input.addEventListener('focus',  () => showDropdown(i, input.value));
-        input.addEventListener('blur',   () => setTimeout(() => hideDropdown(i), 200));
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.className = 'mode-btn' + (btn.dataset.mode === S.mode ? ' selected' : '');
+        btn.onclick = () => selectMode(btn.dataset.mode);
+    });
+
+    if (!S.mode) return;
+    el('enemy-setup').style.display = 'block';
+
+    const count = activeSlotCount();
+    const isJG  = S.mode === 'jg';
+
+    for (let i = 0; i < count; i++) {
+        const enemy = S.enemies[i];
+        const card  = document.createElement('div');
+        card.className = 'champion-setup-card';
+
+        if (isJG) {
+            const champName = enemy.championId ? (S.champions[enemy.championId]?.name ?? enemy.championId) : '';
+            card.innerHTML = `
+                <div class="card-title">${slotLabel(i)}</div>
+                <div class="champion-portrait-setup ${enemy.championId ? 'filled' : ''}" id="portrait-setup-${i}">
+                    ${enemy.championId ? `<img src="${champIcon(enemy.championId)}" alt="${champName}" loading="lazy">` : '?'}
+                </div>
+                <div class="search-container">
+                    <input class="search-input" id="search-${i}" type="text"
+                        placeholder="チャンピオン..." autocomplete="off" value="${champName}">
+                    <div class="search-dropdown" id="dropdown-${i}"></div>
+                </div>
+                <div class="spells-row">
+                    <div class="spell-select-wrap">
+                        <label>D</label>
+                        <select class="spell-select" id="ss0-${i}">${spellOpts(enemy.spells[0])}</select>
+                    </div>
+                    <div class="spell-select-wrap">
+                        <label>F</label>
+                        <select class="spell-select" id="ss1-${i}">${spellOpts(enemy.spells[1])}</select>
+                    </div>
+                </div>`;
+            grid.appendChild(card);
+            const input = el(`search-${i}`);
+            input.addEventListener('input',  () => showDropdown(i, input.value));
+            input.addEventListener('focus',  () => showDropdown(i, input.value));
+            input.addEventListener('blur',   () => setTimeout(() => hideDropdown(i), 200));
+        } else {
+            card.innerHTML = `
+                <div class="card-title">${slotLabel(i)}</div>
+                <div class="spells-row">
+                    <div class="spell-select-wrap">
+                        <label>D スペル</label>
+                        <select class="spell-select" id="ss0-${i}">${spellOpts(enemy.spells[0])}</select>
+                    </div>
+                    <div class="spell-select-wrap">
+                        <label>F スペル</label>
+                        <select class="spell-select" id="ss1-${i}">${spellOpts(enemy.spells[1])}</select>
+                    </div>
+                </div>`;
+            grid.appendChild(card);
+        }
+
         el(`ss0-${i}`).addEventListener('change', e => { S.enemies[i].spells[0] = e.target.value || null; pushEnemies(); checkStart(); });
         el(`ss1-${i}`).addEventListener('change', e => { S.enemies[i].spells[1] = e.target.value || null; pushEnemies(); checkStart(); });
-    });
+    }
     checkStart();
+}
+
+function selectMode(mode) {
+    S.mode = mode;
+    update(fbRef(), { mode });
+    buildSetup();
 }
 
 function spellOpts(selected) {
@@ -746,7 +550,6 @@ function spellOpts(selected) {
         list.map(s => `<option value="${s.id}"${s.id===selected?' selected':''}>${s.name}</option>`).join('');
 }
 
-// ひらがな → カタカナ変換
 function toKatakana(str) {
     return str.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
 }
@@ -755,7 +558,7 @@ function showDropdown(slot, query) {
     const dd = el(`dropdown-${slot}`);
     const q     = query.toLowerCase().trim();
     if (!q) { dd.style.display = 'none'; return; }
-    const qKata = toKatakana(q);  // ひらがなをカタカナに変換してから日本語名と比較
+    const qKata = toKatakana(q);
     const matches = Object.values(S.champions)
         .filter(c => c.name.toLowerCase().includes(qKata) || c.id.toLowerCase().includes(q))
         .slice(0, 8);
@@ -775,7 +578,7 @@ function showDropdown(slot, query) {
 function hideDropdown(slot) { el(`dropdown-${slot}`).style.display = 'none'; }
 
 async function pickChampion(slot, id) {
-    S.enemies[slot].championId = id;
+    S.enemies[slot].championId     = id;
     S.enemies[slot].championDetail = null;
     el(`search-${slot}`).value = S.champions[id]?.name ?? id;
     const portrait = el(`portrait-setup-${slot}`);
@@ -791,25 +594,26 @@ async function pickChampion(slot, id) {
 }
 
 function checkStart() {
-    el('start-btn').disabled = !S.enemies.every(e => e.championId !== null);
+    if (!S.mode) { el('start-btn').disabled = true; return; }
+    if (S.mode === 'jg') {
+        el('start-btn').disabled = !S.enemies.slice(0, 5).every(e => e.championId !== null);
+    } else {
+        el('start-btn').disabled = false;
+    }
 }
 
 el('start-btn').addEventListener('click', startGame);
 
-// ═══════════════════════════════════════════════════
-//  GAME PHASE
-// ═══════════════════════════════════════════════════
+// ─── GAME PHASE ──────────────────────────────────────
 function startGame() {
     hide('setup-phase');
     show('game-phase');
-    S.gameTime  = 0;
-    S.startedAt = null;
-    S.running   = false;
-    S.cooldowns = {};
-    S.ultLevels = [1,1,1,1,1];
+    S.gameTime = 0; S.startedAt = null; S.running = false;
+    S.cooldowns = {}; S.ultLevels = [1,1,1,1,1]; S.gankAlerted = false;
     clearInterval(S.interval);
     el('timer-start').disabled = false;
     update(fbRef(), {
+        mode:      S.mode,
         gameTime:  0,
         running:   false,
         cooldowns: {},
@@ -823,23 +627,34 @@ function startGame() {
 }
 
 function buildCDList() {
-    const list = el('timer-cd-list');
+    const list  = el('timer-cd-list');
     list.innerHTML = '';
-    S.enemies.forEach((enemy, i) => {
-        const champ = S.champions[enemy.championId];
-        const row = document.createElement('div');
-        row.className = 'cd-row';
-        row.innerHTML = `
-            <div class="cd-portrait"><img src="${champIcon(enemy.championId)}" alt="" loading="lazy"></div>
-            <div class="cd-spells">
-                <span class="cd-spell ok" id="cd-${i}-ult">R</span>
-                <span class="cd-spell ok" id="cd-${i}-s0">D</span>
-                <span class="cd-spell ok" id="cd-${i}-s1">F</span>
-            </div>`;
-        list.appendChild(row);
-    });
+    const count = activeSlotCount();
+    const isJG  = S.mode === 'jg';
 
-    // topTPタイマー行
+    for (let i = 0; i < count; i++) {
+        const enemy = S.enemies[i];
+        const row   = document.createElement('div');
+        row.className = 'cd-row';
+        if (isJG && enemy.championId) {
+            row.innerHTML = `
+                <div class="cd-portrait"><img src="${champIcon(enemy.championId)}" alt="" loading="lazy"></div>
+                <div class="cd-spells">
+                    <span class="cd-spell ok" id="cd-${i}-ult">R</span>
+                    <span class="cd-spell ok" id="cd-${i}-s0">D</span>
+                    <span class="cd-spell ok" id="cd-${i}-s1">F</span>
+                </div>`;
+        } else {
+            row.innerHTML = `
+                <div class="cd-portrait" style="background:var(--bg-medium);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--gold);">${slotShort(i)}</div>
+                <div class="cd-spells">
+                    <span class="cd-spell ok" id="cd-${i}-s0">D</span>
+                    <span class="cd-spell ok" id="cd-${i}-s1">F</span>
+                </div>`;
+        }
+        list.appendChild(row);
+    }
+
     const topRow = document.createElement('div');
     topRow.className = 'cd-row';
     topRow.innerHTML = `
@@ -853,91 +668,89 @@ function buildCDList() {
 }
 
 function updateCDList() {
-    S.enemies.forEach((_, i) => {
-        [['ult','R'], ['s0','D'], ['s1','F']].forEach(([key, label]) => {
+    const count = activeSlotCount();
+    const isJG  = S.mode === 'jg';
+    for (let i = 0; i < count; i++) {
+        const keys = isJG ? [['ult','R'],['s0','D'],['s1','F']] : [['s0','D'],['s1','F']];
+        keys.forEach(([key, label]) => {
             const span = el(`cd-${i}-${key}`);
-            if (!span) return;
-            const data = S.cooldowns[`${i}_${key}`];
-            if (!data) {
-                span.className = 'cd-spell ok';
-                span.textContent = label;
-            } else {
-                const remaining = (data.usedAt + data.duration) - S.gameTime;
-                if (remaining <= 0) {
-                    span.className = 'cd-spell ok';
-                    span.textContent = label;
-                } else {
-                    span.className = 'cd-spell cd';
-                    span.textContent = fmt(remaining);
-                }
-            }
+            if (span) updateCDSpan(span, S.cooldowns[`${i}_${key}`], label);
         });
-    });
-
-    // topTP タイマー
-    [['t0','4m'], ['t1','7m'], ['t2','5m']].forEach(([key, label]) => {
+    }
+    [['t0','4m'],['t1','7m'],['t2','5m']].forEach(([key, label]) => {
         const span = el(`cd-top-${key}`);
-        if (!span) return;
-        const data = S.cooldowns[`top_${key}`];
-        if (!data) {
-            span.className = 'cd-spell ok';
-            span.textContent = label;
-        } else {
-            const remaining = (data.usedAt + data.duration) - S.gameTime;
-            if (remaining <= 0) {
-                span.className = 'cd-spell ok';
-                span.textContent = label;
-            } else {
-                span.className = 'cd-spell cd';
-                span.textContent = fmt(remaining);
-            }
-        }
+        if (span) updateCDSpan(span, S.cooldowns[`top_${key}`], label);
     });
 }
 
+function updateCDSpan(span, data, label) {
+    if (!data) {
+        span.className = 'cd-spell ok'; span.textContent = label;
+    } else {
+        const remaining = (data.usedAt + data.duration) - S.gameTime;
+        if (remaining <= 0) {
+            span.className = 'cd-spell ok'; span.textContent = label;
+        } else {
+            span.className = 'cd-spell cd'; span.textContent = fmt(remaining);
+        }
+    }
+}
+
 function buildCIRow() {
-    const row = el('ci-row');
+    const row   = el('ci-row');
     row.innerHTML = '<span class="ci-row-label">コズミックインサイト:</span>';
-    S.enemies.forEach((enemy, i) => {
-        const name = S.champions[enemy.championId]?.name ?? `敵${i+1}`;
+    const count = activeSlotCount();
+    for (let i = 0; i < count; i++) {
+        const enemy = S.enemies[i];
+        const name  = (S.mode === 'jg' && enemy.championId)
+            ? (S.champions[enemy.championId]?.name ?? slotLabel(i))
+            : slotLabel(i);
         const label = document.createElement('label');
         label.className = 'ci-toggle';
         label.innerHTML = `<input type="checkbox" id="ci-${i}"${enemy.ci?' checked':''}><span>${name}</span>`;
         row.appendChild(label);
         el(`ci-${i}`).addEventListener('change', e => { S.enemies[i].ci = e.target.checked; });
-    });
+    }
 }
 
 function buildTrackingGrid() {
-    const grid = el('tracking-grid');
+    const grid  = el('tracking-grid');
     grid.innerHTML = '';
-    S.enemies.forEach((enemy, i) => {
+    const count = activeSlotCount();
+    const isJG  = S.mode === 'jg';
+
+    for (let i = 0; i < count; i++) {
+        const enemy = S.enemies[i];
         const champ = S.champions[enemy.championId];
         const ult   = enemy.championDetail?.spells?.[3];
         const card  = document.createElement('div');
         card.className = 'champ-card';
         card.id = `card-${i}`;
-        card.innerHTML = `
-            <div class="champ-card-header">
-                <div class="champ-portrait-game">
-                    <img src="${champIcon(enemy.championId)}" alt="${champ?.name ?? ''}" loading="lazy">
-                </div>
-                <div class="champ-name">${champ?.name ?? enemy.championId}</div>
-            </div>
-            <div class="spells-body">
+
+        let headerHTML = isJG && enemy.championId
+            ? `<div class="champ-portrait-game"><img src="${champIcon(enemy.championId)}" alt="${champ?.name ?? ''}" loading="lazy"></div>
+               <div class="champ-name">${champ?.name ?? enemy.championId}</div>`
+            : `<div class="champ-name">${slotLabel(i)}</div>`;
+
+        let spellsHTML = isJG
+            ? `<div class="spells-body">
                 ${spellRowHTML(i, 'ult', ult ? spellImg(ult.image.full) : null, ult?.name ?? 'R (Ult)', true)}
                 ${spellRowHTML(i, 's0', spellImgFromId(enemy.spells[0]), spellName(enemy.spells[0], 'スペル1'), false)}
                 ${spellRowHTML(i, 's1', spellImgFromId(enemy.spells[1]), spellName(enemy.spells[1], 'スペル2'), false)}
-            </div>
-        `;
-        grid.appendChild(card);
-    });
+               </div>`
+            : `<div class="spells-body two-col">
+                ${spellRowHTML(i, 's0', spellImgFromId(enemy.spells[0]), spellName(enemy.spells[0], 'D スペル'), false)}
+                ${spellRowHTML(i, 's1', spellImgFromId(enemy.spells[1]), spellName(enemy.spells[1], 'F スペル'), false)}
+               </div>`;
 
-    // topTP & 5分タイマーカード
+        card.innerHTML = `<div class="champ-card-header">${headerHTML}</div>${spellsHTML}`;
+        grid.appendChild(card);
+    }
+
     const TOP_TIMERS = [
-        { key: 't0', label: 'TP (4分)',       icon: '4m', cd: 240 },
+        { key: 't0', label: 'TP (4分)',        icon: '4m', cd: 240 },
         { key: 't1', label: 'アンリーシュドTP', icon: '7m', cd: 420 },
-        { key: 't2', label: '5分タイマー',     icon: '5m', cd: 300 },
+        { key: 't2', label: '5分タイマー',      icon: '5m', cd: 300 },
     ];
     const topCard = document.createElement('div');
     topCard.className = 'champ-card';
@@ -956,9 +769,12 @@ function buildTrackingGrid() {
                 <button class="use-btn" id="btn-top-${t.key}"
                     onclick="useTopTimer('${t.key}',${t.cd})">使用</button>
             </div>`).join('')}
-        </div>
-    `;
+        </div>`;
     grid.appendChild(topCard);
+
+    // グリッド列数を枚数に合わせる
+    const totalCards = count + 1;
+    grid.style.gridTemplateColumns = `repeat(${Math.min(totalCards, 5)}, 1fr)`;
 }
 
 function spellRowHTML(slot, key, iconUrl, name, isUlt) {
@@ -994,9 +810,7 @@ function spellName(id, fallback) {
     return id ? (S.summonerSpells[id]?.name ?? fallback) : fallback;
 }
 
-// ═══════════════════════════════════════════════════
-//  TIMER
-// ═══════════════════════════════════════════════════
+// ─── TIMER ───────────────────────────────────────────
 el('timer-start').addEventListener('click', () => {
     if (S.running) return;
     S.running = true;
@@ -1006,25 +820,41 @@ el('timer-start').addEventListener('click', () => {
 });
 
 function tick() {
-    // startedAt から経過秒を計算（インターバルのずれを防ぐ）
     if (S.running && S.startedAt) {
         S.gameTime = Math.floor((Date.now() - S.startedAt) / 1000);
     }
     const m = String(Math.floor(S.gameTime/60)).padStart(2,'0');
     const s = String(S.gameTime%60).padStart(2,'0');
     el('game-timer').textContent = `${m}:${s}`;
-    S.enemies.forEach((_,i) => {
-        refreshSpell(i,'ult');
-        refreshSpell(i,'s0');
-        refreshSpell(i,'s1');
-    });
+
+    const count = activeSlotCount();
+    for (let i = 0; i < count; i++) {
+        if (S.mode === 'jg') refreshSpell(i, 'ult');
+        refreshSpell(i, 's0');
+        refreshSpell(i, 's1');
+    }
     ['t0','t1','t2'].forEach(k => refreshTopTimer(k));
     updateCDList();
+
+    // 2:55 ガンクアラート
+    if (S.running && S.gameTime === 175 && !S.gankAlerted) {
+        S.gankAlerted = true;
+        showGankAlert();
+    }
 }
 
-// ═══════════════════════════════════════════════════
-//  COOLDOWN LOGIC
-// ═══════════════════════════════════════════════════
+// ─── GANK ALERT ──────────────────────────────────────
+function showGankAlert() {
+    const existing = document.getElementById('gank-alert');
+    if (existing) existing.remove();
+    const div = document.createElement('div');
+    div.id = 'gank-alert';
+    div.innerHTML = `⚠️ 初回ガンクタイミング！<div class="alert-sub">2:55 — ジャングラーがサイドレーンに向かっている可能性があります</div>`;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 10000);
+}
+
+// ─── COOLDOWN LOGIC ──────────────────────────────────
 function getCooldown(slot, key) {
     const e = S.enemies[slot];
     if (key === 'ult') {
@@ -1037,7 +867,7 @@ function getCooldown(slot, key) {
     const sp  = S.summonerSpells[e.spells[idx]];
     if (!sp) return 0;
     let cd = sp.cooldown?.[0] ?? 0;
-    if (e.ci) cd = Math.round(cd * 100 / 115);  // Cosmic Insight: +15 spell haste
+    if (e.ci) cd = Math.round(cd * 100 / 115);
     return cd;
 }
 
@@ -1058,10 +888,8 @@ function refreshTopTimer(key) {
     if (!row) return;
     const data = S.cooldowns[k];
     if (!data) {
-        row.className = 'spell-col available';
-        st.className  = 'spell-status ok';
-        st.textContent = '使用可能';
-        av.textContent = '';
+        row.className = 'spell-col available'; st.className = 'spell-status ok';
+        st.textContent = '使用可能'; av.textContent = '';
         if (btn) btn.disabled = false;
         return;
     }
@@ -1069,14 +897,11 @@ function refreshTopTimer(key) {
     const remaining = availAt - S.gameTime;
     if (remaining <= 0) {
         delete S.cooldowns[k];
-        row.className = 'spell-col available';
-        st.className  = 'spell-status ok';
-        st.textContent = '使用可能';
-        av.textContent = '';
+        row.className = 'spell-col available'; st.className = 'spell-status ok';
+        st.textContent = '使用可能'; av.textContent = '';
         if (btn) btn.disabled = false;
     } else {
-        row.className = 'spell-col on-cd';
-        st.className  = 'spell-status cd';
+        row.className = 'spell-col on-cd'; st.className = 'spell-status cd';
         st.textContent = `残り ${fmt(remaining)}`;
         av.textContent = `${fmt(availAt)} に使用可能`;
         if (btn) btn.disabled = true;
@@ -1099,30 +924,22 @@ function refreshSpell(slot, key) {
     const av  = el(`av-${slot}-${key}`);
     const btn = el(`btn-${slot}-${key}`);
     if (!row) return;
-
     const data = S.cooldowns[k];
     if (!data) {
-        row.className = 'spell-col available';
-        st.className  = 'spell-status ok';
-        st.textContent = '使用可能';
-        av.textContent = '';
+        row.className = 'spell-col available'; st.className = 'spell-status ok';
+        st.textContent = '使用可能'; av.textContent = '';
         if (btn) btn.disabled = false;
         return;
     }
-
-    const availAt  = data.usedAt + data.duration;
+    const availAt   = data.usedAt + data.duration;
     const remaining = availAt - S.gameTime;
-
     if (remaining <= 0) {
         delete S.cooldowns[k];
-        row.className = 'spell-col available';
-        st.className  = 'spell-status ok';
-        st.textContent = '使用可能';
-        av.textContent = '';
+        row.className = 'spell-col available'; st.className = 'spell-status ok';
+        st.textContent = '使用可能'; av.textContent = '';
         if (btn) btn.disabled = false;
     } else {
-        row.className = 'spell-col on-cd';
-        st.className  = 'spell-status cd';
+        row.className = 'spell-col on-cd'; st.className = 'spell-status cd';
         st.textContent = `残り ${fmt(remaining)}`;
         av.textContent = `${fmt(availAt)} に使用可能`;
         if (btn) btn.disabled = true;
@@ -1133,17 +950,12 @@ function fmt(sec) {
     return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
 }
 
-// ═══════════════════════════════════════════════════
-//  GLOBAL EXPORTS (module scope → inline onclick)
-// ═══════════════════════════════════════════════════
+// ─── GLOBAL EXPORTS ───────────────────────────────────
 window.useSpell     = useSpell;
 window.useTopTimer  = useTopTimer;
 window.pushUltLevel = pushUltLevel;
 window.resetRoom    = resetRoom;
 
-// ═══════════════════════════════════════════════════
-//  START
-// ═══════════════════════════════════════════════════
 init();
 </script>
 </body>
